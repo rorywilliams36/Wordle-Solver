@@ -54,6 +54,15 @@ class WordleGame:
         return False
 
 
+def checkInput(guessed):
+    if len(guessed) != 5:
+        return False
+    if not guessed.isalpha():
+        return False
+    
+    return True
+
+
 if __name__ == "__main__":
     wordle = WordleGame()
     if wordle.answer == None:
@@ -61,6 +70,10 @@ if __name__ == "__main__":
 
     while not wordle.solved and wordle.guesses_left < 6:
         guessed = input("Enter a word: ")
+
+        while not checkInput(guessed):
+            guessed = input("Enter a valid string: ")
+
         print(wordle.guess(guessed)[0])
         wordle.solved = wordle.check(guessed)
         wordle.guesses_left += 1
