@@ -9,7 +9,7 @@ class WordleGame:
         self.guesses = np.array([])
         self.sim = sim
         self.solved = False
-        self.guesses_left = 0
+        self.num_guesses = 0
 
     def pickRandomWord(self):
         return random.choice(self.word_list)
@@ -68,19 +68,21 @@ if __name__ == "__main__":
     if wordle.answer == None:
         wordle.answer = wordle.pickRandomWord()
 
-    while not wordle.solved and wordle.guesses_left < 6:
-        guessed = input("Enter a word: ")
+    while not wordle.solved and wordle.num_guesses < 6:
+        guessed = input("\nEnter a word: ").lower()
 
         while not checkInput(guessed):
             guessed = input("Enter a valid string: ")
 
         print(wordle.guess(guessed)[0])
         wordle.solved = wordle.check(guessed)
-        wordle.guesses_left += 1
+        wordle.num_guesses += 1
 
     if wordle.solved:
-        print(f"\nWord guess correctly, you did it in {wordle.guesses_left} tries")
+        print(f"\nWord guess correctly, you did it in {wordle.num_guesses} tries")
     else:
-        print("The correct word was: " + wordle.answer)
+        print("\nThe correct word was: " + wordle.answer)
+    
+    print("\nPress ctrl + c to end program")
 
 
