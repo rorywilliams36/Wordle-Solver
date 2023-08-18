@@ -22,32 +22,22 @@ class WordleGame:
         % = Yellow
         _ = Grey
 
-        Arrays are also returned for simulations
         """
         self.output = ['.'] * len(guessed)
-
-        green = np.array([])
-        yellow = np.array([])
-        grey = np.array([])
 
         if self.answer != None and guessed != None:
             # Checks for greens
             for i in range(len(self.answer)):
                 if self.answer[i] == guessed[i]:
                     self.output[i] = '*'
-                    np.append(green, (guessed[i], i))
             
                 elif self.output[i] != '*':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
                         self.output[i] = '%'
-                        np.append(yellow, (guessed[i], i))
                     else:
                         # If letter not in word then grey
                         self.output[i] = '_'
-                        np.append(grey, guessed[i])
-
-        # return self.output
 
     def check(self, guessed):
         if guessed == self.answer:
@@ -85,7 +75,7 @@ if __name__ == "__main__":
                 guessed = input("Enter a valid word: ")
 
             wordle.guess(guessed)
-            print(wordle.output)
+            print(" ".join(wordle.output))
             wordle.solved = wordle.check(guessed)
             wordle.num_guesses += 1
 
