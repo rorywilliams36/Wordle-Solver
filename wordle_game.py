@@ -37,8 +37,7 @@ class WordleGame:
                     self.output[i] = '*'
                     np.append(green, (guessed[i], i))
             
-            for i in range(len(self.answer)):
-                if self.output[i] != '*':
+                elif self.output[i] != '*':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
                         self.output[i] = '%'
