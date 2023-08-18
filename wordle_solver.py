@@ -5,27 +5,25 @@ from wordle_game import *
 
 """ 
 Wordle solver
+
+Green letter = Letter is in the answer and also the correct position
+Yellow = Letter is in the word but wrong position
+Grey = Letter is not in the word
+
 """
 
 ANSWER = "" # Target word
-
-green = np.array([]) # Contains tuple (letter, position) of correct letters in the correct position
-yellow = np.array([]) # contains tuple ^ of correct letters and incorrect position
-grey = np.array([]) # Contains characters which aren't included in the target word
-
 WORDLE_WORDS = np.loadtxt("words.txt", dtype=str) # All words able to be answers in wordle
-words_available = np.copy(WORDLE_WORDS)
-inputted_words = np.array([]) # Tracks user's guesses
 
 class WordleSolver:
 
     def __init__(self):
-        self.words = WORDLE_WORDS
-        self.guesses = np.array([])
-        self.inputted_words = np.array([])
-        self.green = np.array([])
-        self.yellow = np.array([])
-        self.grey = np.array([])
+        self.words = WORDLE_WORDS # Avaliable words 
+        self.guesses = np.array([]) # Best words for next guess
+        self.inputted_words = np.array([]) 
+        self.green = np.array([]) # Array containing position of green letters (letter, pos)
+        self.yellow = np.array([]) # Array containing position of yellow letters
+        self.grey = np.array([]) # Array containing letters not included in the target/answer word
 
 
     def grey_eliminate(self, temp):
