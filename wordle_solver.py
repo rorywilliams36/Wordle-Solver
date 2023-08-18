@@ -132,6 +132,9 @@ class WordleSolver:
 
 if __name__ == "__main__":
     solver = WordleSolver()
+    game = WordleGame()
+
+
     solver.grey = np.array(['i', 'r', 'a', 't', 'f', 'u', 's', 'w'])
     solver.yellow = np.array([('e', 4), ('o', 1), ('h', 1), ('o', 2)])
     solver.green = np.array([('l', 3)])
@@ -140,5 +143,6 @@ if __name__ == "__main__":
     solver.words = solver.yellow_eliminate(None)
     solver.guesses = solver.get_greens(None)
     solver.guesses = solver.get_yellows(None)
+
 
     print(solver.guesses)

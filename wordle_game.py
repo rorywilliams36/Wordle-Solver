@@ -7,6 +7,7 @@ class WordleGame:
         self.answer = answer
         self.word_list = np.loadtxt('words.txt', dtype = str)
         self.guesses = np.array([])
+        self.output = []
         self.sim = sim
         self.solved = False
         self.num_guesses = 0
@@ -23,7 +24,8 @@ class WordleGame:
 
         Arrays are also returned for simulations
         """
-        output = ['.'] * len(guessed)
+        self.output = ['.'] * len(guessed)
+
         green = np.array([])
         yellow = np.array([])
         grey = np.array([])
@@ -32,21 +34,21 @@ class WordleGame:
             # Checks for greens
             for i in range(len(self.answer)):
                 if self.answer[i] == guessed[i]:
-                    output[i] = '*'
+                    self.output[i] = '*'
                     np.append(green, (guessed[i], i))
             
             for i in range(len(self.answer)):
-                if output[i] != '*':
+                if self.output[i] != '*':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
-                        output[i] = '%'
+                        self.output[i] = '%'
                         np.append(yellow, (guessed[i], i))
                     else:
                         # If letter not in word then grey
-                        output[i] = '_'
+                        self.output[i] = '_'
                         np.append(grey, guessed[i])
 
-        return output, grey, yellow, green
+        # return self.output
 
     def check(self, guessed):
         if guessed == self.answer:
@@ -65,24 +67,25 @@ def checkInput(guessed):
 
 if __name__ == "__main__":
     wordle = WordleGame()
-    if wordle.answer == None:
-        wordle.answer = wordle.pickRandomWord()
+    if not wordle.sim:
+        if wordle.answer == None:
+            wordle.answer = wordle.pickRandomWord()
 
-    while not wordle.solved and wordle.num_guesses < 6:
-        guessed = input("\nEnter a word: ").lower()
+        while not wordle.solved and wordle.num_guesses < 6:
+            guessed = input("\nEnter a word: ").lower()
 
-        while not checkInput(guessed):
-            guessed = input("Enter a valid string: ")
+            while not checkInput(guessed):
+                guessed = input("Enter a valid string: ")
 
-        print(wordle.guess(guessed)[0])
-        wordle.solved = wordle.check(guessed)
-        wordle.num_guesses += 1
+            wordle.guess(guessed)
+            print(wordle.output)
+            wordle.solved = wordle.check(guessed)
+            wordle.num_guesses += 1
 
-    if wordle.solved:
-        print(f"\nWord guess correctly, you did it in {wordle.num_guesses} tries")
-    else:
-        print("\nThe correct word was: " + wordle.answer)
+        if wordle.solved:
+            print(f"\nWord guess correctly, you did it in {wordle.num_guesses} tries")
+        else:
+            print("\nThe correct word was: " + wordle.answer)
     
-    print("\nPress ctrl + c to end program")
 
 
