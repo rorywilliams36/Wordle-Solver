@@ -83,11 +83,13 @@ class WordleSolver:
 
         return self.guesses
 
+
     def get_yellows(self, temp):
         """
-        Returns list with words that contain yellow letters regardless of the letters position
+        Returns array of words which only contain yellow letters
+        Used if no greens are found
         """
-
+        
         if temp != None:
             self.yellow = np.copy(temp)
 
@@ -106,12 +108,34 @@ class WordleSolver:
 
         return self.guesses
 
-    def check_multi_letter(self):
-        """
-        Checks if word contains multiple of same letters
-        """
-        return None
 
+    def get_guesses(self, temp):
+        """
+        For some reason won't let me delete items from guesses so I added all words
+        I want to a new array then copied it ( self.guesses = np.delete(self.guesses, np.where(xx)[0][0]) )
+
+        From guesses returns an array of the words which contain yellows and greens
+        """
+        new = np.array([])
+        if temp != None:
+            self.yellow = np.copy(temp)
+
+        check = len(self.yellow)
+
+        for w in self.guesses:
+            count = 0
+            for y in self.yellow:
+                (l, pos) = y
+                if w.__contains__(l):
+                    count += 1
+
+            if check != 0 and count != 0:
+                if count == check:
+                    new = np.append(new, w)
+
+        self.guesses = new.copy()
+        return self.guesses
+        
     def get_next_best(self):
         """
         Gets the best next word to guess
@@ -124,25 +148,24 @@ class WordleSolver:
         """
         return None
 
-# 11/08 Wordle "HELLO"
-# words = grey_eliminate(WORDLE_WORDS, np.array(['i', 'r', 'a', 't', 'f', 'u', 's', 'w']))
-# words = yellow_eliminate(words, np.array([('e', 4), ('o', 1), ('h', 1), ('o', 2)]))
-# guesses = get_greens(words, np.array([('l', 3)]))
-# guesses = get_yellows(guesses, np.array([('e', 4), ('o', 1), ('h', 1), ('o', 2)]))
 
 if __name__ == "__main__":
     solver = WordleSolver()
     game = WordleGame()
 
+    solver.grey = np.array(['w'])
+    solver.yellow = np.array([('a', 3)])
+    solver.green = np.array([('r', 1)])
 
-    solver.grey = np.array(['i', 'r', 'a', 't', 'f', 'u', 's', 'w'])
-    solver.yellow = np.array([('e', 4), ('o', 1), ('h', 1), ('o', 2)])
-    solver.green = np.array([('l', 3)])
+    solver.grey_eliminate(None)
+    solver.yellow_eliminate(None)
 
-    solver.words = solver.grey_eliminate(None)
-    solver.words = solver.yellow_eliminate(None)
-    solver.guesses = solver.get_greens(None)
-    solver.guesses = solver.get_yellows(None)
+    if len(solver.green) == 0:
+        solver.get_yellows(None)
+    else:
+        solver.get_greens(None)
+
+    solver.get_guesses(None)
 
 
     print(solver.guesses)
