@@ -71,11 +71,19 @@ if __name__ == "__main__":
         if wordle.answer == None:
             wordle.answer = wordle.pickRandomWord()
 
+        print("Wordle\n")
+        print(" * = Green Letter ")
+        print(" % = Yellow Letter ")
+        print(" _ = Grey Letter\n")
+        print("Must enter a a 5 letter word")
+        print("Press crtl+c to exit\n")
+
         while not wordle.solved and wordle.num_guesses < 6:
-            guessed = input("\nEnter a word: ").lower()
+            print(f"\nGuesses left: {6 - wordle.num_guesses}")
+            guessed = input("Enter a word: ").lower()
 
             while not checkInput(guessed):
-                guessed = input("Enter a valid string: ")
+                guessed = input("Enter a valid word: ")
 
             wordle.guess(guessed)
             print(wordle.output)
@@ -83,7 +91,7 @@ if __name__ == "__main__":
             wordle.num_guesses += 1
 
         if wordle.solved:
-            print(f"\nWord guess correctly, you did it in {wordle.num_guesses} tries")
+            print(f"\nWord guess correctly, you did it in {wordle.num_guesses} guesses")
         else:
             print("\nThe correct word was: " + wordle.answer)
     
