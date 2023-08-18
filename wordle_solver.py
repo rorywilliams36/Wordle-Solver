@@ -1,6 +1,4 @@
 import numpy as np 
-import os
-
 from wordle_game import *
 
 """ 
@@ -19,16 +17,16 @@ class WordleSolver:
 
     def __init__(self):
         self.words = WORDLE_WORDS # Avaliable words 
-        self.guesses = np.array([]) # Best words for next guess
-        self.inputted_words = np.array([]) 
-        self.green = np.array([]) # Array containing position of green letters (letter, pos)
-        self.yellow = np.array([]) # Array containing position of yellow letters
+        self.guesses = np.array([]) # Contains best words/guesses
+        self.user_inputs = np.array([]) 
+        self.green = np.array([]) # Array containing position of green letters [(letter, pos)]
+        self.yellow = np.array([]) # Array containing position of yellow letters [(letter, pos)]
         self.grey = np.array([]) # Array containing letters not included in the target/answer word
 
 
     def grey_eliminate(self, temp):
         """ 
-        Returns a list of words which don't contain grey letters
+        Removes words from the array which contain the grey letters
         """
         if temp != None:
             self.grey = np.copy(temp)
@@ -42,8 +40,7 @@ class WordleSolver:
 
     def yellow_eliminate(self, temp):
         """
-        Returns list of words where letters aren't in the same position of the yellow letters
-        Used for creating unlikely guesses (words with multiple of same letters)
+        Removes words from array which contain yellow letters in the stored positions
         """
         if temp != None:
             self.yellow = np.copy(temp)
@@ -114,7 +111,7 @@ class WordleSolver:
         For some reason won't let me delete items from guesses so I added all words
         I want to a new array then copied it ( self.guesses = np.delete(self.guesses, np.where(xx)[0][0]) )
 
-        From guesses returns an array of the words which contain yellows and greens
+        From guesses returns an array of the words which contain both yellow and green letters
         """
         new = np.array([])
         if temp != None:
@@ -153,9 +150,9 @@ if __name__ == "__main__":
     solver = WordleSolver()
     game = WordleGame()
 
-    solver.grey = np.array(['w'])
-    solver.yellow = np.array([('a', 3)])
-    solver.green = np.array([('r', 1)])
+    solver.grey = np.array([])
+    solver.yellow = np.array([])
+    solver.green = np.array([])
 
     solver.grey_eliminate(None)
     solver.yellow_eliminate(None)
@@ -166,6 +163,5 @@ if __name__ == "__main__":
         solver.get_greens(None)
 
     solver.get_guesses(None)
-
 
     print(solver.guesses)
