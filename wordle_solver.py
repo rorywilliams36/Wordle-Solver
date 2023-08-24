@@ -18,11 +18,11 @@ Refactor elimination/get guesses functions
 Link to game
 Use letter frequencies for best guesses or create scoring system
 
-
 '''
 
 ANSWER = "" # Target word
 WORDLE_WORDS = np.loadtxt("words.txt", dtype=str) # All words able to be answers in wordle
+WORD_SCORES = np.load("word_scores.npy", allow_pickle=True).tolist() 
 
 class WordleSolver:
 
@@ -35,12 +35,10 @@ class WordleSolver:
         self.grey = np.array([]) # Array containing letters not included in the target/answer word
 
 
-    def grey_eliminate(self, temp):
+    def grey_eliminate(self):
         """ 
         Removes words from the array which contain the grey letters
         """
-        if temp != None:
-            self.grey = np.copy(temp)
 
         for g in self.grey:
             for w in self.words:
@@ -49,12 +47,10 @@ class WordleSolver:
 
         return self.words
 
-    def yellow_eliminate(self, temp):
+    def yellow_eliminate(self):
         """
         Removes words from array which contain yellow letters in the stored positions
         """
-        if temp != None:
-            self.yellow = np.copy(temp)
 
         for y in self.yellow:
             (l, pos) = y
@@ -66,13 +62,10 @@ class WordleSolver:
 
         return self.words
 
-    def get_greens(self, temp):
+    def get_greens(self):
         """
         Returns a list of words with already correct letters (greens)
         """
-
-        if temp != None:
-            self.green = np.copy(temp)
 
         check = len(self.green)
 
@@ -92,14 +85,11 @@ class WordleSolver:
         return self.guesses
 
 
-    def get_yellows(self, temp):
+    def get_yellows(self):
         """
         Returns array of words which only contain yellow letters
         Used if no greens are found
         """
-        
-        if temp != None:
-            self.yellow = np.copy(temp)
 
         check = len(self.yellow)
 
@@ -117,17 +107,13 @@ class WordleSolver:
         return self.guesses
 
 
-    def get_guesses(self, temp):
+    def get_guesses(self):
         """
-        For some reason won't let me delete items from guesses so I added all words
-        I want to a new array then copied it ( self.guesses = np.delete(self.guesses, np.where(xx)[0][0]) )
+        For some reason won't let me delete items from guesses so I added all words I want to a new array then copied it ( self.guesses = np.delete(self.guesses, np.where(xx)[0][0]) )
 
         From guesses returns an array of the words which contain both yellow and green letters
         """
         new = np.array([])
-        if temp != None:
-            self.yellow = np.copy(temp)
-
         check = len(self.yellow)
 
         for w in self.guesses:
@@ -153,12 +139,6 @@ class WordleSolver:
 
 
 
-        return None
-
-    def allocate_letters(self):
-        """
-        Allocates the letters in the current guess to the respective lists
-        """
         return None
 
 
