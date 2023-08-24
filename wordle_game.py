@@ -18,7 +18,7 @@ class WordleGame:
     def guess(self, guessed):
         """
         Returns a string of indicating what letters are correct from the guess
-        * = Green
+        ! = Green
         % = Yellow
         _ = Grey
 
@@ -29,9 +29,9 @@ class WordleGame:
             # Checks for greens
             for i in range(len(self.answer)):
                 if self.answer[i] == guessed[i]:
-                    self.output[i] = '*'
+                    self.output[i] = '!'
             
-                elif self.output[i] != '*':
+                elif self.output[i] != '!':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
                         self.output[i] = '%'
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             wordle.answer = wordle.pickRandomWord()
 
         print("Wordle\n")
-        print(" * = Green Letter ")
+        print(" ! = Green Letter ")
         print(" % = Yellow Letter ")
         print(" _ = Grey Letter\n")
         print("Must enter a a 5 letter word")

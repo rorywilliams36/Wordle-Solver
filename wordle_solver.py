@@ -10,6 +10,17 @@ Grey = Letter is not in the word
 
 """
 
+
+'''
+TODO:
+
+Refactor elimination/get guesses functions
+Link to game
+Use letter frequencies for best guesses or create scoring system
+
+
+'''
+
 ANSWER = "" # Target word
 WORDLE_WORDS = np.loadtxt("words.txt", dtype=str) # All words able to be answers in wordle
 
@@ -137,6 +148,11 @@ class WordleSolver:
         """
         Gets the best next word to guess
         """
+
+        #for w in self.guesses:
+
+
+
         return None
 
     def allocate_letters(self):
@@ -163,5 +179,6 @@ if __name__ == "__main__":
         solver.get_greens(None)
 
     solver.get_guesses(None)
+        
 
     print(solver.guesses)
