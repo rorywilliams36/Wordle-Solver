@@ -16,7 +16,6 @@ TODO:
 
 Refactor elimination/get guesses functions
 Link to game
-Use letter frequencies for best guesses or create scoring system *
 
 '''
 
@@ -35,29 +34,23 @@ class WordleSolver:
         self.grey = np.array([]) # Array containing letters not included in the target/answer word
 
 
-    def grey_eliminate(self):
+    def filter(self):
         """ 
-        Removes words from the array which contain the grey letters
+        Removes words from the array which contain the invalid letters
         """
 
+        # Removes grey letters
         for g in self.grey:
             for w in self.words:
                 if w.__contains__(g):
                     self.words = np.delete(self.words, np.where(self.words == w)[0][0])
 
-        return self.words
-
-    def yellow_eliminate(self):
-        """
-        Removes words from array which contain yellow letters in the stored positions
-        """
-
+        # Removes yellow letters
         for y in self.yellow:
             (l, pos) = y
-            pos = int(pos)
             for w in self.words:
                 if w.__contains__(l):
-                    if w[pos] == l:
+                    if w[int(pos)] == l:
                         self.words = np.delete(self.words, np.where(self.words == w)[0][0])
 
         return self.words
@@ -73,14 +66,11 @@ class WordleSolver:
             count = 0
             for g in self.green:
                 (l, pos) = g
-                pos = int(pos)
-                if w.__contains__(l):
-                    if w[pos] == l:
-                        count += 1
+                if w[int(pos)] == l:
+                    count += 1
 
-            if check != 0 and count != 0:
-                if count == check:
-                    self.guesses = np.append(self.guesses, w)
+            if check != 0 and count != 0 and count == check:
+                self.guesses = np.append(self.guesses, w)
 
         return self.guesses
 
@@ -88,7 +78,6 @@ class WordleSolver:
     def get_yellows(self):
         """
         Returns array of words which only contain yellow letters
-        Used if no greens are found
         """
 
         check = len(self.yellow)
@@ -100,9 +89,8 @@ class WordleSolver:
                 if w.__contains__(l):
                     count += 1
 
-            if check != 0 and count != 0:
-                if count == check:
-                    self.guesses = np.append(self.guesses, w)
+            if check != 0 and count != 0 and count == check:
+                self.guesses = np.append(self.guesses, w)
 
         return self.guesses
 
@@ -123,8 +111,7 @@ class WordleSolver:
                 if w.__contains__(l):
                     count += 1
 
-            if check != 0 and count != 0:
-                if count == check:
+            if check != 0 and count != 0 and count == check:
                     new = np.append(new, w)
 
         self.guesses = new.copy()
@@ -133,27 +120,48 @@ class WordleSolver:
     def get_guess_scores(self):
         """
         Returns array of tuples containing the guess and its score
+
+        TODO:
+        Base scores
+        More vowels ++
+        More common ++
+        Multi letters --
         """
         scores = []
         for g in self.guesses:
             scores.append((g, WORD_SCORES[g]))
 
         scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
-        print(scores)
+        #print(scores)
 
         return scores
 
+def allocate_letters(output, guessed, green, yellow, grey):
+
+    for i in range(0, 4):
+        if output[i] == '!':
+            green = np.append(green, j)
+        elif output[i] == '%':
+            yellow = np.append(yellow, j)
+        else:
+            grey = np.append(grey, guessed[i])
+
+    return green, yellow, grey
+
+
+def simulate():
+    first = 'irate'
+    
 
 if __name__ == "__main__":
     solver = WordleSolver()
-    game = WordleGame()
+    wordle = WordleGame()
 
-    solver.grey = np.array(['i','r','t'])
-    solver.yellow = np.array([('e',4), ('c',0), ('n',2)])
+    solver.grey = np.array([])
+    solver.yellow = np.array([])
     solver.green = np.array([])
 
-    solver.grey_eliminate()
-    solver.yellow_eliminate()
+    solver.filter()
 
     if len(solver.green) == 0:
         solver.get_yellows()
@@ -161,7 +169,19 @@ if __name__ == "__main__":
         solver.get_greens()
 
     solver.get_guesses()
-    solver.get_guess_scores()
-        
+    scores = solver.get_guess_scores()
 
-    print(solver.guesses)
+    # solver.words = np.copy(solver.guesses)
+
+    #print(solver.guesses)
+    #print(scores)
+    # scores = []
+    # for w in WORDLE_WORDS:
+    #     scores.append((w, WORD_SCORES[w]))
+
+    # scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
+
+    # print(scores[:5])
+
+    # solver.green, solver.yellow, solver.grey = allocate_letters(['!', '!', '_', '%', '_'], "irate", solver.green, solver.yellow, solver.grey)
+    print(solver.green)
