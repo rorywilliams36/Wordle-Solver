@@ -1,10 +1,9 @@
 import numpy as np
 import os
-from wordle_solver import *
-from wordle_game import *
+
 
 WORDS = np.loadtxt('words.txt', dtype = str)
-PATH = '#'
+PATH = 'C:/Users/roryw/Documents/Wordle Solver'
 
 alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
@@ -24,7 +23,7 @@ def get_letter_freq():
 
     for k in freqs:
         for i in range(0,5):
-            freqs[k][i] = freqs[k][i]/len(WORDS)
+            freqs[k][i] = freqs[k][i]
 
     np.save(f"{PATH}/letter_freqs.npy", freqs)
 

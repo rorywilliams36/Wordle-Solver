@@ -16,7 +16,7 @@ TODO:
 
 Refactor elimination/get guesses functions
 Link to game
-Use letter frequencies for best guesses or create scoring system
+Use letter frequencies for best guesses or create scoring system *
 
 '''
 
@@ -130,35 +130,38 @@ class WordleSolver:
         self.guesses = new.copy()
         return self.guesses
         
-    def get_next_best(self):
+    def get_guess_scores(self):
         """
-        Gets the best next word to guess
+        Returns array of tuples containing the guess and its score
         """
+        scores = []
+        for g in self.guesses:
+            scores.append((g, WORD_SCORES[g]))
 
-        #for w in self.guesses:
+        scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
+        print(scores)
 
-
-
-        return None
+        return scores
 
 
 if __name__ == "__main__":
     solver = WordleSolver()
     game = WordleGame()
 
-    solver.grey = np.array([])
-    solver.yellow = np.array([])
+    solver.grey = np.array(['i','r','t'])
+    solver.yellow = np.array([('e',4), ('c',0), ('n',2)])
     solver.green = np.array([])
 
-    solver.grey_eliminate(None)
-    solver.yellow_eliminate(None)
+    solver.grey_eliminate()
+    solver.yellow_eliminate()
 
     if len(solver.green) == 0:
-        solver.get_yellows(None)
+        solver.get_yellows()
     else:
-        solver.get_greens(None)
+        solver.get_greens()
 
-    solver.get_guesses(None)
+    solver.get_guesses()
+    solver.get_guess_scores()
         
 
     print(solver.guesses)
