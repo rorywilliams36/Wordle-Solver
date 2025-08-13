@@ -4,7 +4,7 @@ import random
 class WordleGame:
 
     def __init__(self, answer: str = None, sim: bool = False):
-        self.answer = answer
+        self.answer = 'eerie'
         self.word_list = np.loadtxt('words.txt', dtype = str)
         self.guesses = np.array([])
         self.guessed = ""
@@ -29,7 +29,7 @@ class WordleGame:
         if self.answer != None and guessed != None:
             # Checks for greens
             for i in range(len(self.answer)):
-                # Gets indexes of double letters in the answer
+                # Gets indexes of double letters in the answer and guess
                 mult_letters = [j for j, l in enumerate(self.answer) if l == guessed[i]]
                 mult_guess_l =  [j for j, l in enumerate(guessed) if l == guessed[i]]
 
@@ -39,27 +39,31 @@ class WordleGame:
                 elif self.output[i] != '!':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
+                        # checks for double letters 
+                        # if letter occurs more than once in both answer and guess set the next occurence to gray
                         if len(mult_letters) >= len(mult_guess_l):
                             self.output[i] = '%'
+                        # if the guess has mult letters and answer doesnt set the next occurances to gray
                         else:
                             self.output[i] = '_'
                             
-                        # self.output[i] = '%'
                     else:
                         # If letter not in word then grey
                         self.output[i] = '_'
                         
         return self.output
 
+    # Checks for win
     def check(self, guessed):
         if guessed == self.answer:
             return True
         return False
 
-
+# Validates input
 def checkInput(guessed):
     if len(guessed) != 5 and (guessed not in wordle.word_list):
         return False
+    # checks if the input only contains letters
     if not guessed.isalpha():
         return False
     
