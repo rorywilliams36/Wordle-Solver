@@ -29,9 +29,9 @@ class WordleSolver:
         self.words = WORDLE_WORDS # Avaliable words 
         self.guesses = np.array([]) # Contains best words/guesses
         self.user_inputs = np.array([]) 
-        self.green = np.array([]) # Array containing position of green letters [(letter, pos)]
-        self.yellow = np.array([]) # Array containing position of yellow letters [(letter, pos)]
-        self.grey = np.array([]) # Array containing letters not included in the target/answer word
+        self.green = [] # Array containing position of green letters [(letter, pos)]
+        self.yellow = [] # Array containing position of yellow letters [(letter, pos)]
+        self.grey = [] # Array containing letters not included in the target/answer word
 
 
     def filter(self):
@@ -136,17 +136,17 @@ class WordleSolver:
 
         return scores
 
-def allocate_letters(output, guessed, green, yellow, grey):
+    def allocate_letters(self, guessed):
 
-    for i in range(0, 4):
-        if output[i] == '!':
-            green = np.append(green, j)
-        elif output[i] == '%':
-            yellow = np.append(yellow, j)
-        else:
-            grey = np.append(grey, guessed[i])
+        for i in range(0, 5):
+            if self.output[i] == 'G':
+                self.green.append((guessed[i], i))
+            elif output[i] == 'Y':
+                self.yellow.append((guessed[i], i))
+            else:
+                self.grey.append(guessed[i])
 
-    return green, yellow, grey
+        return green, yellow, grey
 
 
 def simulate():
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     solver = WordleSolver()
     wordle = WordleGame()
 
-    solver.grey = np.array([])
-    solver.yellow = np.array([])
-    solver.green = np.array([])
+    solver.grey = ['a', 'e']
+    solver.yellow = []
+    solver.green = []
 
     solver.filter()
 
@@ -170,18 +170,7 @@ if __name__ == "__main__":
 
     solver.get_guesses()
     scores = solver.get_guess_scores()
-
-    # solver.words = np.copy(solver.guesses)
-
-    #print(solver.guesses)
-    #print(scores)
-    # scores = []
-    # for w in WORDLE_WORDS:
-    #     scores.append((w, WORD_SCORES[w]))
-
-    # scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
-
-    # print(scores[:5])
+    print(scores)
 
     # solver.green, solver.yellow, solver.grey = allocate_letters(['!', '!', '_', '%', '_'], "irate", solver.green, solver.yellow, solver.grey)
-    print(solver.green)
+

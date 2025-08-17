@@ -19,30 +19,32 @@ class WordleGame:
     def guess(self, guessed):
         """
         Returns a string of indicating what letters are correct from the guess
-        ! = Green
-        % = Yellow
+        G = Green
+        Y = Yellow
         _ = Grey
 
         """
         self.output = ['.'] * len(guessed)
 
+        # Game rules/logic
         if self.answer != None and guessed != None:
-            # Checks for greens
             for i in range(len(self.answer)):
-                # Gets indexes of double letters in the answer and guess
-                mult_letters = [j for j, l in enumerate(self.answer) if l == guessed[i]]
-                mult_guess_l =  [j for j, l in enumerate(guessed) if l == guessed[i]]
+                # Gets indexes of the letter at i in both the answer and guess
+                mult_ans_l = len([j for j, l in enumerate(self.answer) if l == guessed[i]])
+                # gets indexes of letter at i in the guessed word
+                mult_guess_l =  len([j for j, l in enumerate(guessed) if l == guessed[i]])
 
+                # Sets Greens
                 if self.answer[i] == guessed[i]:
-                    self.output[i] = '!'
+                    self.output[i] = 'G'
             
-                elif self.output[i] != '!':
+                elif self.output[i] != 'G':
                     # Checks for yellows
                     if self.answer.__contains__(guessed[i]):
                         # checks for double letters 
                         # if letter occurs more than once in both answer and guess set the next occurence to gray
-                        if len(mult_letters) >= len(mult_guess_l):
-                            self.output[i] = '%'
+                        if mult_ans_l >= mult_guess_l:
+                            self.output[i] = 'Y'
                         # if the guess has mult letters and answer doesnt set the next occurances to gray
                         else:
                             self.output[i] = '_'
@@ -77,8 +79,8 @@ if __name__ == "__main__":
             wordle.answer = wordle.pickRandomWord()
         
         print("Wordle\n")
-        print(" ! = Green Letter ")
-        print(" % = Yellow Letter ")
+        print(" G = Green Letter ")
+        print(" Y = Yellow Letter ")
         print(" _ = Grey Letter\n")
         print("Must enter a a 5 letter word")
         print("Press crtl+c to exit\n")
