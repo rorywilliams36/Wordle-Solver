@@ -56,7 +56,8 @@ class WordleGame:
                 else:
                     self.output[i] = "_"
                     self.guessed_letters['Grey'].add(guess[i].upper())
-                    
+
+        # Update Guessed Letter Dict           
         # Meant to emulate the keyboard display
         # If a letter is green and yellow in the current guess green takes prioity
         # Letter cannot be grey and another colour
