@@ -83,6 +83,7 @@ class WordleGame:
         return True
 
 def print_guessed_letters(guessed_letters):
+    ''' Prints all letters used in guesses and all remaining '''
     greys = guessed_letters['Grey']
     yellows = guessed_letters['Yellow']
     greens = guessed_letters['Green']
