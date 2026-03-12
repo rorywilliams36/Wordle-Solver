@@ -11,6 +11,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if args.game:
-        run_game(None)
+        run_game(args.set_answer)
 
 
