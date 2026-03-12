@@ -1,4 +1,4 @@
-import random
+import random, string
 import numpy as np
 
 WORD_LEN = 5
@@ -82,6 +82,19 @@ class WordleGame:
             return False
         return True
 
+def print_guessed_letters(guessed_letters):
+    greys = guessed_letters['Grey']
+    yellows = guessed_letters['Yellow']
+    greens = guessed_letters['Green']
+    unused = set(string.ascii_uppercase) - greens - yellows - greys
+
+    print("\n-----------------------")
+    print("Green :", " ".join(sorted(greens)))
+    print("Yellow:", " ".join(sorted(yellows)))
+    print("Grey  :", " ".join(sorted(greys)))
+    print("Unused:", " ".join(sorted(unused)))
+    print("-----------------------")
+    
 
 if __name__ == "__main__":
     wordle = WordleGame(answer=None)
@@ -110,7 +123,8 @@ if __name__ == "__main__":
             # Compares guess to answer
             wordle.game(wordle.guess)
             print("".join(wordle.output))
-            print(f'Guessed Letters: {wordle.guessed_letters}')
+
+            print_guessed_letters(wordle.guessed_letters)
             wordle.solved = wordle.check(wordle.guess)
             wordle.num_guesses += 1
 
