@@ -56,7 +56,11 @@ class WordleGame:
                 else:
                     self.output[i] = "_"
                     self.guessed_letters['Grey'].add(guess[i].upper())
-                        
+                    
+
+        # Letter cannot be grey and another colour
+        self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
+
         return self.output
 
     def check(self, guess):
