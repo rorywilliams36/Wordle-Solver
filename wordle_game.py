@@ -57,9 +57,12 @@ class WordleGame:
                     self.output[i] = "_"
                     self.guessed_letters['Grey'].add(guess[i].upper())
                     
-
+        # Meant to emulate the keyboard display
+        # If a letter is green and yellow in the current guess green takes prioity
         # Letter cannot be grey and another colour
         self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
+        # Sets yellow letter to green if found
+        self.guessed_letters['Yellow'] = self.guessed_letters['Yellow'] - self.guessed_letters['Green']
 
         return self.output
 
@@ -97,7 +100,7 @@ def print_guessed_letters(guessed_letters):
     print("Green :", " ".join(sorted(greens)))
     print("Yellow:", " ".join(sorted(yellows)))
     print("Grey  :", " ".join(sorted(greys)))
-    print("Remaining:", " ".join(sorted(unused)))
+    print("Unused:", " ".join(sorted(unused)))
     
 def run_game(answer):
     wordle = WordleGame(answer)
