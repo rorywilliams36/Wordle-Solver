@@ -2,6 +2,7 @@ import random, string
 import numpy as np
 
 WORD_LEN = 5
+MAX_GUESSES = 6
 
 class WordleGame:
 
@@ -97,7 +98,7 @@ def print_guessed_letters(guessed_letters):
     print("-----------------------")
     
 
-if __name__ == "__main__":
+def run_game(answer):
     wordle = WordleGame(answer=None)
  
     if not wordle.sim:
@@ -110,12 +111,12 @@ if __name__ == "__main__":
         print(" G = Green Letter ")
         print(" Y = Yellow Letter ")
         print(" _ = Grey Letter\n")
-        print("Must enter a a 5 letter word")
+        print("Must enter a 5 letter word")
         print("Press crtl+c to exit\n")
 
         # user input for guess
-        while not wordle.solved and wordle.num_guesses < 6:
-            print(f"\nGuesses left: {6 - wordle.num_guesses}")
+        while not wordle.solved and wordle.num_guesses < MAX_GUESSES:
+            print(f"\nGuesses left: {MAX_GUESSES - wordle.num_guesses}")
             wordle.guess = input("Enter a word: ").lower()
 
             while not wordle.check_input(wordle.guess):
