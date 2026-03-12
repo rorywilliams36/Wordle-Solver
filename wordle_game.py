@@ -97,7 +97,7 @@ def print_guessed_letters(guessed_letters):
     
 
 def run_game(answer):
-    wordle = WordleGame(answer=None)
+    wordle = WordleGame(answer)
  
     # Sets random word as answer if no word is set
     if wordle.answer is None:
@@ -124,14 +124,18 @@ def run_game(answer):
         print(f'\nRESULT: {" ".join(wordle.output)}')
 
         print_guessed_letters(wordle.guessed_letters)
-        
+
         print("-----------------------")
         wordle.solved = wordle.check(wordle.guess)
         wordle.num_guesses += 1
 
     # Game is Finished
+    print("\n======================")
+    print("    GAME FINISHED   ")
+    print("======================")
+
     if wordle.solved:
-        print(f"\nWord guess correctly, you did it in {wordle.num_guesses} guesses")
+        print(f"\nWord guessed correctly, you did it in {wordle.num_guesses} guesses")
     else:
         print("\nThe correct word was: " + wordle.answer)
     
