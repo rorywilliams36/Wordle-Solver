@@ -1,13 +1,16 @@
 import numpy as np
 import random
 
+WORD_LEN = 5
+STATES = {'_', 'Y', 'G'}
+
 class WordleGame:
 
     def __init__(self, answer: str = None, sim: bool = False):
-        self.answer = 'eerie'
+        self.answer = 'abide'
         self.word_list = np.loadtxt('words.txt', dtype = str)
         self.guesses = np.array([])
-        self.guessed = ""
+        self.guess = ""
         self.output = []
         self.sim = sim
         self.solved = False
@@ -16,61 +19,51 @@ class WordleGame:
     def pickRandomWord(self):
         return random.choice(self.word_list)
 
-    def guess(self, guessed):
+    def game(self, guess):
         """
         Returns a string of indicating what letters are correct from the guess
         G = Green
         Y = Yellow
         _ = Grey
-
         """
-        self.output = ['.'] * len(guessed)
+        
+        self.output = ["."] * WORD_LEN
+        answer_letters = list(self.answer)
 
-        # Game rules/logic
-        if self.answer != None and guessed != None:
-            for i in range(len(self.answer)):
-                # Gets indexes of the letter at i in both the answer and guess
-                mult_ans_l = len([j for j, l in enumerate(self.answer) if l == guessed[i]])
-                # gets indexes of letter at i in the guessed word
-                mult_guess_l =  len([j for j, l in enumerate(guessed) if l == guessed[i]])
+        # Check for greens
+        for i in range(WORD_LEN):
+            if guess[i] == self.answer[i]:
+                self.output[i] = "G"
+                # Set letter as seen
+                answer_letters[i] = None
 
-                # Sets Greens
-                if self.answer[i] == guessed[i]:
-                    self.output[i] = 'G'
-            
-                elif self.output[i] != 'G':
-                    # Checks for yellows
-                    if self.answer.__contains__(guessed[i]):
-                        # checks for double letters 
-                        # if letter occurs more than once in both answer and guess set the next occurence to gray
-                        if mult_ans_l >= mult_guess_l:
-                            self.output[i] = 'Y'
-                        # if the guess has mult letters and answer doesnt set the next occurances to gray
-                        else:
-                            self.output[i] = '_'
-                            
-                    else:
-                        # If letter not in word then grey
-                        self.output[i] = '_'
+        # Check for greys and yellows
+        for i in range(WORD_LEN):
+            if self.output[i] == ".":
+                if guess[i] in answer_letters:
+                    self.output[i] = "Y"
+                    # set letter as seen
+                    answer_letters[answer_letters.index(guess[i])] = None
+                # Set grey
+                else:
+                    self.output[i] = "_"
                         
         return self.output
 
     # Checks for win
-    def check(self, guessed):
-        if guessed == self.answer:
+    def check(self, guess):
+        if guess == self.answer:
             return True
         return False
 
 # Validates input
-def checkInput(guessed):
-    if len(guessed) != 5 and (guessed not in wordle.word_list):
+def checkInput(guess):
+    if len(guess) != WORD_LEN and (guess not in wordle.word_list):
         return False
     # checks if the input only contains letters
-    if not guessed.isalpha():
+    if not guess.isalpha():
         return False
-    
     return True
-
 
 if __name__ == "__main__":
     wordle = WordleGame()
@@ -87,14 +80,14 @@ if __name__ == "__main__":
 
         while not wordle.solved and wordle.num_guesses < 6:
             print(f"\nGuesses left: {6 - wordle.num_guesses}")
-            wordle.guessed = input("Enter a word: ").lower()
+            wordle.guess = input("Enter a word: ").lower()
 
-            while not checkInput(wordle.guessed):
-                wordle.guessed = input("Enter a valid word: ")
+            while not checkInput(wordle.guess):
+                wordle.guess = input("Enter a valid word: ")
 
-            wordle.guess(wordle.guessed)
+            wordle.game(wordle.guess)
             print("".join(wordle.output))
-            wordle.solved = wordle.check(wordle.guessed)
+            wordle.solved = wordle.check(wordle.guess)
             wordle.num_guesses += 1
 
         if wordle.solved:
