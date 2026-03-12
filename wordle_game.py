@@ -97,9 +97,8 @@ def print_guessed_letters(guessed_letters):
     print("Green :", " ".join(sorted(greens)))
     print("Yellow:", " ".join(sorted(yellows)))
     print("Grey  :", " ".join(sorted(greys)))
-    print("Unused:", " ".join(sorted(unused)))
+    print("Remaining:", " ".join(sorted(unused)))
     
-
 def run_game(answer):
     wordle = WordleGame(answer)
  
