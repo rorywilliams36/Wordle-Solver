@@ -6,13 +6,12 @@ MAX_GUESSES = 6
 
 class WordleGame:
 
-    def __init__(self, answer: str = None, sim: bool = False):
+    def __init__(self, answer: str = None):
         self.answer = answer
         self.word_list = np.loadtxt('data/words.txt', dtype = str)
         self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
         self.guess = ""
         self.output = []
-        self.sim = sim
         self.solved = False
         self.num_guesses = 0
 
@@ -90,51 +89,51 @@ def print_guessed_letters(guessed_letters):
     greens = guessed_letters['Green']
     unused = set(string.ascii_uppercase) - greens - yellows - greys
 
-    print("\n-----------------------")
+    print("\nLETTERS USED/REMAINING:")
     print("Green :", " ".join(sorted(greens)))
     print("Yellow:", " ".join(sorted(yellows)))
     print("Grey  :", " ".join(sorted(greys)))
     print("Unused:", " ".join(sorted(unused)))
-    print("-----------------------")
     
 
 def run_game(answer):
     wordle = WordleGame(answer=None)
  
-    if not wordle.sim:
-        # Sets random word as answer if no word is set
-        if wordle.answer is None:
-            wordle.answer = wordle.pick_random_word()
+    # Sets random word as answer if no word is set
+    if wordle.answer is None:
+        wordle.answer = wordle.pick_random_word()
+    
+    # Game UI/Rules
+    print("-------- Wordle --------")
+    print(" G = Green Letter ")
+    print(" Y = Yellow Letter ")
+    print(" _ = Grey Letter\n")
+    print("Must enter a 5 letter word")
+    print("Press crtl+c to exit")
+
+    # user input for guess
+    while not wordle.solved and wordle.num_guesses < MAX_GUESSES:
+        print(f"\nGuesses left: {MAX_GUESSES - wordle.num_guesses}")
+        wordle.guess = input("Enter a word: ").lower()
+
+        while not wordle.check_input(wordle.guess):
+            wordle.guess = input("Enter a valid word: ")
+
+        # Compares guess to answer
+        wordle.game(wordle.guess)
+        print(f'\nRESULT: {" ".join(wordle.output)}')
+
+        print_guessed_letters(wordle.guessed_letters)
         
-        # Game UI/Rules
-        print("Wordle\n")
-        print(" G = Green Letter ")
-        print(" Y = Yellow Letter ")
-        print(" _ = Grey Letter\n")
-        print("Must enter a 5 letter word")
-        print("Press crtl+c to exit\n")
+        print("-----------------------")
+        wordle.solved = wordle.check(wordle.guess)
+        wordle.num_guesses += 1
 
-        # user input for guess
-        while not wordle.solved and wordle.num_guesses < MAX_GUESSES:
-            print(f"\nGuesses left: {MAX_GUESSES - wordle.num_guesses}")
-            wordle.guess = input("Enter a word: ").lower()
-
-            while not wordle.check_input(wordle.guess):
-                wordle.guess = input("Enter a valid word: ")
-
-            # Compares guess to answer
-            wordle.game(wordle.guess)
-            print("".join(wordle.output))
-
-            print_guessed_letters(wordle.guessed_letters)
-            wordle.solved = wordle.check(wordle.guess)
-            wordle.num_guesses += 1
-
-        # Game is Finished
-        if wordle.solved:
-            print(f"\nWord guess correctly, you did it in {wordle.num_guesses} guesses")
-        else:
-            print("\nThe correct word was: " + wordle.answer)
+    # Game is Finished
+    if wordle.solved:
+        print(f"\nWord guess correctly, you did it in {wordle.num_guesses} guesses")
+    else:
+        print("\nThe correct word was: " + wordle.answer)
     
 
 
