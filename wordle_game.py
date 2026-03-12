@@ -1,21 +1,21 @@
-import numpy as np
 import random
+import numpy as np
 
 WORD_LEN = 5
 
 class WordleGame:
 
     def __init__(self, answer: str = None, sim: bool = False):
-        self.answer = 'abide'
+        self.answer = answer
         self.word_list = np.loadtxt('words.txt', dtype = str)
-        self.guesses = np.array([])
+        self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
         self.guess = ""
         self.output = []
         self.sim = sim
         self.solved = False
         self.num_guesses = 0
 
-    def pickRandomWord(self):
+    def pick_random_word(self):
         ''' Picks random word from wordlist '''
         return random.choice(self.word_list)
 
@@ -42,6 +42,7 @@ class WordleGame:
                 self.output[i] = "G"
                 # Set letter as seen
                 answer_letters[i] = None
+                self.guessed_letters['Green'].add(guess[i].upper())
 
         # Check for greys and yellows
         for i in range(WORD_LEN):
@@ -50,9 +51,11 @@ class WordleGame:
                     self.output[i] = "Y"
                     # set letter as seen
                     answer_letters[answer_letters.index(guess[i])] = None
+                    self.guessed_letters['Yellow'].add(guess[i].upper())
                 # Set grey
                 else:
                     self.output[i] = "_"
+                    self.guessed_letters['Grey'].add(guess[i].upper())
                         
         return self.output
 
@@ -62,29 +65,31 @@ class WordleGame:
             return True
         return False
 
-def checkInput(guess):
-    ''' 
-    Validates user's guessed/inputted word
+    def check_input(self, guess):
+        ''' 
+        Validates user's guessed/inputted word
 
-    Args:
-        guess: string of user's input
+        Args:
+            guess: string of user's input
 
-    Return:
-        boolean stating whether guess is valid
-    '''
+        Return:
+            boolean stating whether guess is valid
+        '''
 
-    if len(guess) != WORD_LEN and (guess not in wordle.word_list):
-        return False
-    if not guess.isalpha():
-        return False
-    return True
+        if len(guess) != WORD_LEN and (guess not in self.word_list):
+            return False
+        if not guess.isalpha():
+            return False
+        return True
+
 
 if __name__ == "__main__":
-    wordle = WordleGame()
+    wordle = WordleGame(answer=None)
+ 
     if not wordle.sim:
         # Sets random word as answer if no word is set
-        if wordle.answer == None:
-            wordle.answer = wordle.pickRandomWord()
+        if wordle.answer is None:
+            wordle.answer = wordle.pick_random_word()
         
         # Game UI/Rules
         print("Wordle\n")
@@ -99,12 +104,13 @@ if __name__ == "__main__":
             print(f"\nGuesses left: {6 - wordle.num_guesses}")
             wordle.guess = input("Enter a word: ").lower()
 
-            while not checkInput(wordle.guess):
+            while not wordle.check_input(wordle.guess):
                 wordle.guess = input("Enter a valid word: ")
 
             # Compares guess to answer
             wordle.game(wordle.guess)
             print("".join(wordle.output))
+            print(f'Guessed Letters: {wordle.guessed_letters}')
             wordle.solved = wordle.check(wordle.guess)
             wordle.num_guesses += 1
 
