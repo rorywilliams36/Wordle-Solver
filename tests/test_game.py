@@ -34,3 +34,29 @@ def test_multi_letters_in_guess():
     wordle = WordleGame(answer)
     res = wordle.game('allee')
     assert "".join(wordle.output) == "YG___"
+
+def test_guessed_letters():
+    answer = 'irate'
+    wordle = WordleGame(answer)
+    res = wordle.game('plant')
+
+    greys = wordle.guessed_letters['Grey']
+    yellows = wordle.guessed_letters['Yellow']
+    greens = wordle.guessed_letters['Green']
+
+    assert greys == {'P', 'L', 'N'}
+    assert yellows == {'T'}
+    assert greens == {'A'}
+
+def test_update_yellows_guessed_letters():    
+    answer = 'irate'
+    wordle = WordleGame(answer)
+    wordle.guessed_letters['Yellow'] = {'A'}
+    res = wordle.game('plant')
+
+    greys = wordle.guessed_letters['Grey']
+    yellows = wordle.guessed_letters['Yellow']
+    greens = wordle.guessed_letters['Green']
+
+    assert 'A' not in yellows
+    assert greens == {'A'}
