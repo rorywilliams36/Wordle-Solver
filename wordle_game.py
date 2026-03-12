@@ -2,7 +2,6 @@ import numpy as np
 import random
 
 WORD_LEN = 5
-STATES = {'_', 'Y', 'G'}
 
 class WordleGame:
 
@@ -17,6 +16,7 @@ class WordleGame:
         self.num_guesses = 0
 
     def pickRandomWord(self):
+        ''' Picks random word from wordlist '''
         return random.choice(self.word_list)
 
     def game(self, guess):
@@ -25,6 +25,12 @@ class WordleGame:
         G = Green
         Y = Yellow
         _ = Grey
+
+        Args:
+            guess: string of user's guessed/inputted word
+
+        Return:
+            output: result comparing the answer and the guess
         """
         
         self.output = ["."] * WORD_LEN
@@ -50,17 +56,25 @@ class WordleGame:
                         
         return self.output
 
-    # Checks for win
     def check(self, guess):
+        ''' Win condition '''
         if guess == self.answer:
             return True
         return False
 
-# Validates input
 def checkInput(guess):
+    ''' 
+    Validates user's guessed/inputted word
+
+    Args:
+        guess: string of user's input
+
+    Return:
+        boolean stating whether guess is valid
+    '''
+
     if len(guess) != WORD_LEN and (guess not in wordle.word_list):
         return False
-    # checks if the input only contains letters
     if not guess.isalpha():
         return False
     return True
@@ -68,9 +82,11 @@ def checkInput(guess):
 if __name__ == "__main__":
     wordle = WordleGame()
     if not wordle.sim:
+        # Sets random word as answer if no word is set
         if wordle.answer == None:
             wordle.answer = wordle.pickRandomWord()
         
+        # Game UI/Rules
         print("Wordle\n")
         print(" G = Green Letter ")
         print(" Y = Yellow Letter ")
@@ -78,6 +94,7 @@ if __name__ == "__main__":
         print("Must enter a a 5 letter word")
         print("Press crtl+c to exit\n")
 
+        # user input for guess
         while not wordle.solved and wordle.num_guesses < 6:
             print(f"\nGuesses left: {6 - wordle.num_guesses}")
             wordle.guess = input("Enter a word: ").lower()
@@ -85,11 +102,13 @@ if __name__ == "__main__":
             while not checkInput(wordle.guess):
                 wordle.guess = input("Enter a valid word: ")
 
+            # Compares guess to answer
             wordle.game(wordle.guess)
             print("".join(wordle.output))
             wordle.solved = wordle.check(wordle.guess)
             wordle.num_guesses += 1
 
+        # Game is Finished
         if wordle.solved:
             print(f"\nWord guess correctly, you did it in {wordle.num_guesses} guesses")
         else:
