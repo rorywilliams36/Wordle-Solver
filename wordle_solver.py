@@ -20,8 +20,8 @@ Link to game
 '''
 
 ANSWER = "" # Target word
-WORDLE_WORDS = np.loadtxt("words.txt", dtype=str) # All words able to be answers in wordle
-WORD_SCORES = np.load("word_scores.npy", allow_pickle=True).tolist() 
+WORDLE_WORDS = np.loadtxt("data/words.txt", dtype=str) # All words able to be answers in wordle
+WORD_SCORES = np.load("data/word_scores.npy", allow_pickle=True).tolist() 
 
 class WordleSolver:
 
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     solver = WordleSolver()
     wordle = WordleGame()
 
-    solver.grey = ['a', 'e']
-    solver.yellow = []
-    solver.green = []
+    solver.grey = ['a', 't', 'r', 'o', 'n', 'd']
+    solver.yellow = [('s', 0), ('u', 2)]
+    solver.green = [ ('e', 4)]
 
     solver.filter()
 
@@ -171,6 +171,7 @@ if __name__ == "__main__":
     solver.get_guesses()
     scores = solver.get_guess_scores()
     print(scores)
+    print(solver.guesses)
 
     # solver.green, solver.yellow, solver.grey = allocate_letters(['!', '!', '_', '%', '_'], "irate", solver.green, solver.yellow, solver.grey)
 
