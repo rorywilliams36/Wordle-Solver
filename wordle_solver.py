@@ -1,26 +1,20 @@
 import numpy as np 
-from wordle_game import *
+from wordle_game import WordleGame
 
 """ 
 Wordle solver
 
-Green letter = Letter is in the answer and also the correct position
-Yellow = Letter is in the word but wrong position
-Grey = Letter is not in the word
+Green letter G = Letter is in the answer and also the correct position
+Yellow Y = Letter is in the word but wrong position
+Grey _ = Letter is not in the word
 
 """
 
 
-'''
-TODO:
-
-Refactor elimination/get guesses functions
-Link to game
-
-'''
-
 ANSWER = "" # Target word
-WORDLE_WORDS = set(np.loadtxt("data/words.txt", dtype=str)) # All words able to be answers in wordle
+WORDLE_WORDS = set(np.loadtxt("data/wordlists/words.txt", dtype=str)) # All words available in wordle
+WORDS_LIST_LEN = len(WORDLE_WORDS)
+WORD_LEN = 5
 WORD_SCORES = np.load("data/word_scores.npy", allow_pickle=True).tolist() 
 
 class WordleSolver:
@@ -42,19 +36,19 @@ class WordleSolver:
         # Remove grey letters
         self.words = self.remove_greys()
 
-        # Get possible guesses by &ing the words containing yellows with words containing greens
         green_words = self.get_greens()
         yellow_words = self.get_yellows()
 
         # Gets possible guesses
-        if len(green_words) == 0 & len(yellow_words) == 0:
+        if (len(green_words) == 0) & (len(yellow_words) == 0):
             self.guesses = self.words
-        elif len(green_words) == 0 & len(yellow_words) > 0:
+        if (len(green_words) == 0) & (len(yellow_words) > 0):
             self.guesses = yellow_words
-        elif len(green_words) > 0 & len(yellow_words) == 0:
+        if (len(green_words) > 0) & (len(yellow_words) == 0):
             self.guesses = green_words
         else:
-            # Get common words from yellow and green sets
+            # Get common words from yellow and green sets by & operation
+            print('')
             self.guesses = green_words & yellow_words
 
         return self.words, self.guesses
@@ -77,7 +71,6 @@ class WordleSolver:
 
         return green_words
 
-
     def get_yellows(self):
         """
         Returns set of words which only contain yellow letters
@@ -96,6 +89,7 @@ class WordleSolver:
         return yellow_words
 
     def remove_greys(self):
+        ''' Removes all words from the word list that contain grey letters '''
         return set([w for w in self.words if not (set(w) & self.grey)])
 
 
@@ -117,30 +111,32 @@ class WordleSolver:
 
         return scores
 
-    def allocate_letters(self, guessed):
+    def allocate_letters(self, guessed_word, result):
+        '''
+        Function to allocate letters in the last guess into respective
+        arrays/sets based on the result of the gues
 
-        for i in range(0, 5):
-            if self.output[i] == 'G':
-                self.green.append((guessed[i], i))
-            elif output[i] == 'Y':
-                self.yellow.append((guessed[i], i))
+        Args:
+            guessed_word: string of the current word guessed
+            result: result using the guessed_word
+        '''
+        for i in range(WORD_LEN):
+            if result[i] == 'G':
+                self.green.append((guessed_word[i], i))
+            elif result[i] == 'Y':
+                self.yellow.append((guessed_word[i], i))
             else:
-                self.grey.add(guessed[i])
+                self.grey.add(guessed_word[i])
 
-        return green, yellow, grey
-
-
-def simulate():
-    first = 'irate'
-    
 
 if __name__ == "__main__":
     solver = WordleSolver()
     wordle = WordleGame()
 
-    solver.grey = {'a', 't', 'r', 'o', 'n', 'd'}
-    solver.yellow = [('s', 0)]
-    solver.green = [ ('e', 4)]
+    # temp
+    solver.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
+    solver.yellow = [('a', 2), ('n', 3)]
+    solver.green = [ ('e', 4), ('a', 0)]
 
     solver.words, solver.guesses = solver.filter()
 
@@ -148,6 +144,4 @@ if __name__ == "__main__":
     print(scores)
     # print(solver.words)
     print(solver.guesses)
-
-    # solver.green, solver.yellow, solver.grey = allocate_letters(['!', '!', '_', '%', '_'], "irate")
 
