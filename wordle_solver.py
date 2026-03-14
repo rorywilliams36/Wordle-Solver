@@ -38,17 +38,16 @@ class WordleSolver:
 
         green_words = self.get_greens()
         yellow_words = self.get_yellows()
-
+        
         # Gets possible guesses
         if (len(green_words) == 0) & (len(yellow_words) == 0):
             self.guesses = self.words
-        if (len(green_words) == 0) & (len(yellow_words) > 0):
+        elif (len(green_words) == 0) & (len(yellow_words) > 0):
             self.guesses = yellow_words
-        if (len(green_words) > 0) & (len(yellow_words) == 0):
+        elif (len(green_words) > 0) & (len(yellow_words) == 0):
             self.guesses = green_words
         else:
             # Get common words from yellow and green sets by & operation
-            print('')
             self.guesses = green_words & yellow_words
 
         return self.words, self.guesses
@@ -128,6 +127,7 @@ class WordleSolver:
             else:
                 self.grey.add(guessed_word[i])
 
+        return self.grey, self.yellow, self.green
 
 if __name__ == "__main__":
     solver = WordleSolver()
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     # temp
     solver.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
     solver.yellow = [('a', 2), ('n', 3)]
-    solver.green = [ ('e', 4), ('a', 0)]
+    solver.green = [('a', 0), ('e', 4)]
 
     solver.words, solver.guesses = solver.filter()
 
