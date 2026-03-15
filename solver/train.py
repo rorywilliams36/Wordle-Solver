@@ -12,7 +12,7 @@ WORD_LIST_LEN = len(WORD_LIST)
 PATH = 'C:/Users/roryw/Documents/Wordle Solver/data'
 
 class WordleTrain:
-    
+
     def entropy(self, pattern_counts):
         '''
         Finds expected value (information entropy) for guess
@@ -92,5 +92,6 @@ if __name__ == "__main__":
     #guess_matrix = np.load("data/guess_matrix.npy", allow_pickle=True)
     with open(f"{PATH}/first_guess_entropy.json", "r") as f:
         first_guess = json.load(f)
-    print(first_guess)
+    print(first_guess['tares'])
+    print(max(first_guess, key = first_guess.get))
     #print(guess_matrix)

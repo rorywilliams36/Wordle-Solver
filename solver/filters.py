@@ -16,7 +16,6 @@ ANSWER = "" # Target word
 WORDLE_WORDS = set(np.loadtxt("data/wordlists/words.txt", dtype=str)) # All words available in wordle
 WORDS_LIST_LEN = len(WORDLE_WORDS)
 WORD_LEN = 5
-WORD_SCORES = np.load("data/word_scores.npy", allow_pickle=True).tolist() 
 
 class WordleFilter:
 
