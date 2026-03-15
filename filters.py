@@ -2,7 +2,9 @@ import numpy as np
 from wordle_game import WordleGame
 
 """ 
-Wordle solver
+Wordle Filter
+
+Functions used to filter out words from word list based on the guess
 
 Green letter G = Letter is in the answer and also the correct position
 Yellow Y = Letter is in the word but wrong position
@@ -17,12 +19,11 @@ WORDS_LIST_LEN = len(WORDLE_WORDS)
 WORD_LEN = 5
 WORD_SCORES = np.load("data/word_scores.npy", allow_pickle=True).tolist() 
 
-class WordleSolver:
+class WordleFilter:
 
     def __init__(self):
         self.words = WORDLE_WORDS # Avaliable words that can be used
         self.guesses = set() # Contains all possible guesses
-        self.user_inputs = []
         self.green = [] # Array containing position of green letters [(letter, pos)]
         self.yellow = [] # Array containing position of yellow letters [(letter, pos)]
         self.grey = set() # Set containing letters not included in the target/answer word
@@ -38,13 +39,13 @@ class WordleSolver:
 
         green_words = self.get_greens()
         yellow_words = self.get_yellows()
-        
+
         # Gets possible guesses
-        if (len(green_words) == 0) & (len(yellow_words) == 0):
+        if (len(green_words) == 0) and (len(yellow_words) == 0):
             self.guesses = self.words
-        elif (len(green_words) == 0) & (len(yellow_words) > 0):
+        elif (len(green_words) == 0) and (len(yellow_words) > 0):
             self.guesses = yellow_words
-        elif (len(green_words) > 0) & (len(yellow_words) == 0):
+        elif (len(green_words) > 0) and (len(yellow_words) == 0):
             self.guesses = green_words
         else:
             # Get common words from yellow and green sets by & operation
@@ -91,7 +92,6 @@ class WordleSolver:
         ''' Removes all words from the word list that contain grey letters '''
         return set([w for w in self.words if not (set(w) & self.grey)])
 
-
     def get_guess_scores(self):
         """
         Returns array of tuples containing the guess and its score
@@ -130,18 +130,17 @@ class WordleSolver:
         return self.grey, self.yellow, self.green
 
 if __name__ == "__main__":
-    solver = WordleSolver()
-    wordle = WordleGame()
+    word_filter = WordleFilter()
 
     # temp
-    solver.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
-    solver.yellow = [('a', 2), ('n', 3)]
-    solver.green = [('a', 0), ('e', 4)]
+    word_filter.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
+    word_filter.yellow = [('a', 2), ('n', 3)]
+    word_filter.green = [('a', 0), ('e', 4)]
 
-    solver.words, solver.guesses = solver.filter()
+    word_filter.words, word_filter.guesses = word_filter.filter()
 
-    scores = solver.get_guess_scores()
+    scores = word_filter.get_guess_scores()
     print(scores)
-    # print(solver.words)
-    print(solver.guesses)
+    # print(word_filter.words)
+    print(word_filter.guesses)
 

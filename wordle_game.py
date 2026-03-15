@@ -8,7 +8,7 @@ class WordleGame:
 
     def __init__(self, answer: str = None):
         self.answer = answer
-        self.word_list = np.loadtxt('data/words.txt', dtype = str)
+        self.word_list = np.loadtxt('data/wordlists/words.txt', dtype = str)
         self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
         self.guess = ""
         self.output = []
