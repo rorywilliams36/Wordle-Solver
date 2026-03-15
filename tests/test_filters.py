@@ -2,7 +2,7 @@ import os, sys
 import pytest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from filters import WordleFilter
+from solver.filters import WordleFilter
 
 def test_grey_letter_filtering():
     word_filter = WordleFilter()
