@@ -1,5 +1,4 @@
 import numpy as np 
-from wordle_game import WordleGame
 
 """ 
 Wordle Filter
@@ -27,7 +26,6 @@ class WordleFilter:
         self.green = [] # Array containing position of green letters [(letter, pos)]
         self.yellow = [] # Array containing position of yellow letters [(letter, pos)]
         self.grey = set() # Set containing letters not included in the target/answer word
-
 
     def filter(self):
         """ 
@@ -92,24 +90,6 @@ class WordleFilter:
         ''' Removes all words from the word list that contain grey letters '''
         return set([w for w in self.words if not (set(w) & self.grey)])
 
-    def get_guess_scores(self):
-        """
-        Returns array of tuples containing the guess and its score
-
-        TODO:
-        Base scores
-        More vowels ++
-        More common ++
-        Multi letters --
-        """
-        scores = []
-        for g in self.guesses:
-            scores.append((g, WORD_SCORES[g]))
-
-        scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
-
-        return scores
-
     def allocate_letters(self, guessed_word, result):
         '''
         Function to allocate letters in the last guess into respective
@@ -139,7 +119,7 @@ if __name__ == "__main__":
 
     word_filter.words, word_filter.guesses = word_filter.filter()
 
-    scores = word_filter.get_guess_scores()
+    # scores = word_filter.get_guess_scores()
     print(scores)
     # print(word_filter.words)
     print(word_filter.guesses)
