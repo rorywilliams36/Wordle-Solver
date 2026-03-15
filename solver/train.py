@@ -12,14 +12,19 @@ WORD_LIST_LEN = len(WORD_LIST)
 PATH = 'C:/Users/roryw/Documents/Wordle Solver/data'
 
 class WordleTrain:
-
-    def __init__(self):
-        pass
-
-    # Finds expected value (information entropy) for guess
-    # i.e Average information gained for a particular guess
-    # E(I) = Sumof (p(x)) * log2(1/p(x))
+    
     def entropy(self, pattern_counts):
+        '''
+        Finds expected value (information entropy) for guess
+        i.e Average information gained for a particular guess
+        E(I) = Sumof (p(x)) * log2(1/p(x))
+
+        Args:
+            pattern_counts: dict containing counters for occurences of each result/pattern
+
+        Returns:
+            Entropy value (int)
+        '''
         H = 0
         total = sum(pattern_counts.values())
         for c in pattern_counts.values():
@@ -49,34 +54,36 @@ class WordleTrain:
         np.save(f"{PATH}/guess_matrix.npy", m)
 
 
-    # Gets entropy values for every word as a first guess
     def find_first_guess(self):
-        word_filters = WordleFilter()
-        wordle = WordleGame()
+        '''
+        Calculates the expected information gained for every word as a first guess
+        '''
 
+        # Load guess lookup matrix
         guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
-        word_to_index = {w:i for i,w in enumerate(WORD_LIST)}
+        word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
 
         guess_entropy = dict()
 
         for guess in WORD_LIST:
             pattern_counts = dict()
             for answer in WORD_LIST:
+                # Lookup result for guess and answer
                 g_idx = word_to_index[guess]
                 a_idx = word_to_index[answer]
-
                 res = guess_matrix[g_idx][a_idx]
 
+                # Increment result occurence
                 if pattern_counts.get(res):
                     pattern_counts[res] += 1
                 else:
                     pattern_counts[res] = 1
 
-                word_filters.__init__()
-
+            # Calculate entropy for word
             H = self.entropy(pattern_counts)
             guess_entropy[guess] = H
 
+        # Save values as JSON
         with open(f"{PATH}/first_guess_entropy.json", "w") as f:
             json.dump(guess_entropy, f)                
 
