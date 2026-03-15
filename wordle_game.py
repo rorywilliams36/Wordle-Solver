@@ -22,6 +22,40 @@ class WordleGame:
     def game(self, guess):
         """
         Returns a string of indicating what letters are correct from the guess
+        Contains most game logic
+        Also computes a dict containing letters used
+
+        Args:
+            guess: string of user's guessed/inputted word
+
+        Return:
+            output: result comparing the answer and the guess
+        """
+        
+        # Gets result from guess compared to answer
+        self.output = self.pattern(guess, self.answer)
+
+        # Update Guessed Letter Dict           
+        # Meant to emulate the keyboard display
+        # If a letter is green and yellow in the current guess green takes prioity
+        # Letter cannot be grey and another colour
+        for i in range(WORD_LEN):
+            if self.output[i] == 'G':
+                self.guessed_letters['Green'].add(guess[i].upper())            
+            if self.output[i] == 'Y':
+                self.guessed_letters['Yellow'].add(guess[i].upper())            
+            if self.output[i] == '_':
+                self.guessed_letters['Grey'].add(guess[i].upper())
+
+        self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
+        # Sets yellow letter to green if found
+        self.guessed_letters['Yellow'] = self.guessed_letters['Yellow'] - self.guessed_letters['Green']
+
+        return self.output
+
+    def pattern(self, guess, answer):
+        """
+        Returns a string of indicating what letters are correct from the guess
         G = Green
         Y = Yellow
         _ = Grey
@@ -32,17 +66,15 @@ class WordleGame:
         Return:
             output: result comparing the answer and the guess
         """
-        
         self.output = ["."] * WORD_LEN
-        answer_letters = list(self.answer)
+        answer_letters = list(answer)
 
         # Check for greens
         for i in range(WORD_LEN):
-            if guess[i] == self.answer[i]:
+            if guess[i] == answer[i]:
                 self.output[i] = "G"
                 # Set letter as seen
                 answer_letters[i] = None
-                self.guessed_letters['Green'].add(guess[i].upper())
 
         # Check for greys and yellows
         for i in range(WORD_LEN):
@@ -51,19 +83,9 @@ class WordleGame:
                     self.output[i] = "Y"
                     # set letter as seen
                     answer_letters[answer_letters.index(guess[i])] = None
-                    self.guessed_letters['Yellow'].add(guess[i].upper())
                 # Set grey
                 else:
                     self.output[i] = "_"
-                    self.guessed_letters['Grey'].add(guess[i].upper())
-
-        # Update Guessed Letter Dict           
-        # Meant to emulate the keyboard display
-        # If a letter is green and yellow in the current guess green takes prioity
-        # Letter cannot be grey and another colour
-        self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
-        # Sets yellow letter to green if found
-        self.guessed_letters['Yellow'] = self.guessed_letters['Yellow'] - self.guessed_letters['Green']
 
         return self.output
 
