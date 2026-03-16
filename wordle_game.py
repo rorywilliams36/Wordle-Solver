@@ -10,7 +10,6 @@ class WordleGame:
         self.answer = answer
         self.word_list = np.loadtxt('data/wordlists/words.txt', dtype = str)
         self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
-        self.guess = ""
         self.output = []
         self.solved = False
         self.num_guesses = 0
@@ -143,19 +142,19 @@ def run_game(answer):
     # user input for guess
     while not wordle.solved and wordle.num_guesses < MAX_GUESSES:
         print(f"\nGuesses left: {MAX_GUESSES - wordle.num_guesses}")
-        wordle.guess = input("Enter a word: ").lower()
+        guess = input("Enter a word: ").lower()
 
-        while not wordle.check_input(wordle.guess):
-            wordle.guess = input("Enter a valid word: ")
+        while not wordle.check_input(guess):
+            guess = input("Enter a valid word: ")
 
         # Compares guess to answer
-        wordle.game(wordle.guess)
+        wordle.game(guess)
         print(f'\nRESULT: {" ".join(wordle.output)}')
 
         print_guessed_letters(wordle.guessed_letters)
 
         print("-----------------------")
-        wordle.solved = wordle.check(wordle.guess)
+        wordle.solved = wordle.check(guess)
         wordle.num_guesses += 1
 
     # Game is Finished
