@@ -19,11 +19,11 @@ WORD_LEN = 5
 
 class WordleFilter:
 
-    def __init__(self):
-        self.words = WORDLE_WORDS # Avaliable words that can be used
+    def __init__(self, words: set = WORDLE_WORDS):
+        self.words = words # Avaliable words that can be used
         self.guesses = set() # Contains all possible guesses
-        self.green = [] # Array containing position of green letters [(letter, pos)]
-        self.yellow = [] # Array containing position of yellow letters [(letter, pos)]
+        self.green = set() # Array containing position of green letters [(letter, pos)]
+        self.yellow = set() # Array containing position of yellow letters [(letter, pos)]
         self.grey = set() # Set containing letters not included in the target/answer word
 
     def filter(self):
@@ -100,11 +100,16 @@ class WordleFilter:
         '''
         for i in range(WORD_LEN):
             if result[i] == 'G':
-                self.green.append((guessed_word[i], i))
+                self.green.add((guessed_word[i], i))
             elif result[i] == 'Y':
-                self.yellow.append((guessed_word[i], i))
+                self.yellow.add((guessed_word[i], i))
             else:
                 self.grey.add(guessed_word[i])
+        
+        green_set = {c for c, _ in self.green}
+        yellow_set = {c for c, _ in self.yellow}
+
+        self.grey = self.grey - green_set - yellow_set
 
         return self.grey, self.yellow, self.green
 
@@ -112,14 +117,13 @@ if __name__ == "__main__":
     word_filter = WordleFilter()
 
     # temp
-    word_filter.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
-    word_filter.yellow = [('a', 2), ('n', 3)]
-    word_filter.green = [('a', 0), ('e', 4)]
+    word_filter.grey = {'i', 't', 's', 'c', 'h' 'e'}
+    word_filter.yellow = []
+    word_filter.green = [('a', 2), ('r', 1)]
 
     word_filter.words, word_filter.guesses = word_filter.filter()
 
     # scores = word_filter.get_guess_scores()
-    print(scores)
     # print(word_filter.words)
     print(word_filter.guesses)
 
