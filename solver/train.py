@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import json
 import numpy as np
 
@@ -13,9 +14,10 @@ MAX_GUESSES = 6
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 
 class WordleTrain:
-    def __init__(self):
-        self.guess_matrix = None
-        self.word_to_index = None
+    def __init__(self, guess_matrix, word_to_index, first_guess_entropy):
+        self.guess_matrix = guess_matrix
+        self.word_to_index = word_to_index
+        self.first_guess_entropy = first_guess_entropy
 
     def entropy(self, pattern_counts):
         '''
@@ -39,7 +41,7 @@ class WordleTrain:
 
         return H
     
-    def lookup_table(self):
+    def create_guess_matrix(self):
         '''
         Creates matrix where matrix[guess][answer] is the comparison of words using 
         wordle game logic
@@ -55,29 +57,34 @@ class WordleTrain:
             for a, answer in enumerate(list(WORD_LIST)):
                 m[g][a] = "".join(wordle.pattern(guess, answer))
 
-        if not os.path.exists(f"{PATH}/guess_matrix.npy"):
-            file = open(f"{PATH}/guess_matrix.npy", 'x')
+        guess_matrix_path = f'{PATH}/guess_matrix.npy'
 
-        # Save matrix
-        with open(f"{PATH}/guess_matrix.npy", 'wb') as f:
-            np.save(f, m)
+        if not os.path.exists(guess_matrix_path):
+            create_file(guess_matrix_path)
+
+        try:
+            # Save matrix
+            with open(f"{PATH}/guess_matrix.npy", 'wb') as f:
+                np.save(f, m)
+        except FileNotFoundError:
+            print('File not found')
+        except Exception as e:
+            print(f'Error: {e}')
 
     def find_first_guess(self):
         '''
         Calculates the expected information gained for every word as a first guess
         '''
 
-        guess_matrix, word_to_index = load_lookup_table()
-
-        guess_entropy = dict()
+        guess_entropy = {}
 
         for guess in WORD_LIST:
-            pattern_counts = dict()
+            pattern_counts = {}
             for answer in WORD_LIST:
                 # Lookup result for guess and answer
-                g_idx = word_to_index[guess]
-                a_idx = word_to_index[answer]
-                res = guess_matrix[g_idx][a_idx]
+                g_idx = self.word_to_index[guess]
+                a_idx = self.word_to_index[answer]
+                res = self.guess_matrix[g_idx][a_idx]
 
                 # Increment result occurence
                 if pattern_counts.get(res):
@@ -91,19 +98,17 @@ class WordleTrain:
 
         entropy_file_path = f"{PATH}/first_guess_entropy.json"
         if not os.path.exists(entropy_file_path):
-            try:
-                file = open(entropy_file_path, 'x')
-                file.close()
-            except:
-                print('Error creating entropy file')
-                quit()
+            create_file(entropy_file_path)
 
         # Save values as JSON
         try:
             with open(entropy_file_path, "w") as f:
                 json.dump(guess_entropy, f)
-        except:
-            print('Error writing entropy file;\nfile may not exist or values are invailid format')             
+        except FileNotFoundError:
+            print('File not found')
+        except Exception as e:
+            print(f'Error: {e}')
+             
 
     def solve(self, first_guess: str = None):
         '''
@@ -118,18 +123,14 @@ class WordleTrain:
 
         filters = WordleFilter(WORD_LIST)
 
-        # Load data
-        guess_matrix, word_to_index = load_lookup_table()
-        first_guesses = load_first_guess_entropy()
-
         # Set first guess
-        if (first_guess is None) or (not first_guesses.get(guess)):
-            first_guess = max(first_guesses, key = first_guesses.get)
+        if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
+            first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
 
         num_guesses = []
         for answer in list(WORD_LIST)[:50]:
             guess = first_guess
-            guess_num = 1
+            guess_num = 0
             solved = False
             print('================')
             print(answer)
@@ -139,15 +140,17 @@ class WordleTrain:
             # as answer but in differnet order
             completed_guesses = set()
 
-            while (not solved):
-                if guess_num > MAX_GUESSES:
-                    solved = True
-                    guess_num = -2
+            while (not solved) or (guess_num < MAX_GUESSES):
+                # if guess_num > MAX_GUESSES:
+                #     solved = True
+                #     guess_num = -2
+                guess_num += 1      
+
 
                 # gets result for chosen guess
-                g_idx = word_to_index[guess]
-                a_idx = word_to_index[answer]
-                res = guess_matrix[g_idx][a_idx]
+                g_idx = self.word_to_index[guess]
+                a_idx = self.word_to_index[answer]
+                res = self.guess_matrix[g_idx][a_idx]
 
                 print(guess_num, guess)
 
@@ -155,39 +158,40 @@ class WordleTrain:
                 completed_guesses.add(guess)
                 if guess == answer:
                     solved = True
-                else:
-                    # finds possible guesses based on the result
-                    filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
-                    _, pos_guesses = filters.filter()
-                    pos_guesses = pos_guesses - completed_guesses
+                    break
+                
+                # finds possible guesses based on the result
+                filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
+                _, pos_guesses = filters.filter()
+                pos_guesses = pos_guesses - completed_guesses
 
-                    # checks if there are any guesses to be made
-                    if len(pos_guesses) > 0:
-                        guess = self.possible_guess_entropy(pos_guesses, guess_matrix, word_to_index)
-                    # if no guesses available set to unsolved
-                    else:
-                        solved = True
-                        guess_num = -2
+                # checks if there are any guesses to be made
+                if len(pos_guesses) > 0:
+                    guess = self.possible_guess_entropy(pos_guesses)
+                # if no guesses available set to unsolved
+                else:
+                    solved = True
+                    guess_num = -2
+                    break
     
                 # CHANGE WHERE THIS GOES
-                guess_num += 1      
      
             num_guesses.append(guess_num)
             filters.__init__(words=WORD_LIST)
         print(num_guesses)
         print(np.mean(num_guesses))
 
-    def possible_guess_entropy(self, pos_guesses, guess_matrix, word_to_index):
+    def possible_guess_entropy(self, pos_guesses):
         ''' Gets all possible patterns for result '''
-        pos_guess_entropy = dict()
+        pos_guess_entropy = {}
         # print(pos_guesses)
         for guess in pos_guesses:
-            pattern_counts = dict()
+            pattern_counts = {}
             for answer in pos_guesses:
                 # Lookup result for guess and answer
-                g_idx = word_to_index[guess]
-                a_idx = word_to_index[answer]
-                res = guess_matrix[g_idx][a_idx]
+                g_idx = self.word_to_index[guess]
+                a_idx = self.word_to_index[answer]
+                res = self.guess_matrix[g_idx][a_idx]
 
                 # Increment result occurence
                 if pattern_counts.get(res):
@@ -201,34 +205,49 @@ class WordleTrain:
 
         return max(pos_guess_entropy, key = pos_guess_entropy.get)
 
-def load_lookup_table():
+def load_guess_matrix():
     # Load guess lookup matrix
     try:
         guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
         word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
         return guess_matrix, word_to_index
-    except:
-        print('Error loading guess matrix')
-        quit()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
 
 def load_first_guess_entropy():
     try:
         with open(f"{PATH}/first_guess_entropy.json", "r") as f:
             first_guesses = json.load(f)
         return first_guesses
-    except:
-        print('Error loading entropy values')
-        quit()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
+
+def create_file(path):
+    try:
+        file = open(path, 'x')
+        file.close()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
+    else:
+        print('File Created')
+        
 
 if __name__ == "__main__":
-    train = WordleTrain()
+    guess_matrix, word_to_index = load_guess_matrix()
+    first_guess_entropy = load_first_guess_entropy()
+    train = WordleTrain(guess_matrix, word_to_index, first_guess_entropy)
 
     # first_guess = load_first_guess_entropy()
     # print(first_guess['irate'])
     # print(max(first_guess, key = first_guess.get))
-    #train.solve()
+    train.solve()
     # print(os.path.dirname(os.path.abspath(__file__)))
-    print()
     # train.lookup_table()
     # print('guess matrix complete')
     # train.find_first_guess()
