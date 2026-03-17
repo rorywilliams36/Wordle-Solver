@@ -49,27 +49,21 @@ class WordleTrain:
         '''
 
         # Initalise matrix
-        m = [['']*WORD_LIST_LEN for _ in range(WORD_LIST_LEN)]
+        guess_matrix = np.empty((WORD_LIST_LEN, WORD_LIST_LEN), dtype=str)
         wordle = WordleGame()
 
         # Fill matrix
         for g, guess in enumerate(list(WORD_LIST)):
             for a, answer in enumerate(list(WORD_LIST)):
-                m[g][a] = "".join(wordle.pattern(guess, answer))
+                guess_matrix[g][a] = "".join(wordle.pattern(guess, answer))
 
         guess_matrix_path = f'{PATH}/guess_matrix.npy'
 
-        if not os.path.exists(guess_matrix_path):
-            create_file(guess_matrix_path)
-
         try:
-            # Save matrix
-            with open(f"{PATH}/guess_matrix.npy", 'wb') as f:
-                np.save(f, m)
-        except FileNotFoundError:
-            print('File not found')
+            with open(guess_matrix_path, 'wb') as f:
+                np.save(f, guess_matrix)
         except Exception as e:
-            print(f'Error: {e}')
+            print(f"Error: {e}")
 
     def find_first_guess(self):
         '''
@@ -97,18 +91,14 @@ class WordleTrain:
             guess_entropy[guess] = H
 
         entropy_file_path = f"{PATH}/first_guess_entropy.json"
-        if not os.path.exists(entropy_file_path):
-            create_file(entropy_file_path)
 
         # Save values as JSON
         try:
             with open(entropy_file_path, "w") as f:
                 json.dump(guess_entropy, f)
-        except FileNotFoundError:
-            print('File not found')
         except Exception as e:
             print(f'Error: {e}')
-             
+
 
     def solve(self, first_guess: str = None):
         '''
@@ -142,11 +132,7 @@ class WordleTrain:
             completed_guesses = set()
 
             while (not solved) or (guess_num < MAX_GUESSES):
-                # if guess_num > MAX_GUESSES:
-                #     solved = True
-                #     guess_num = -2
                 guess_num += 1      
-
 
                 # gets result for chosen guess
                 g_idx = self.word_to_index[guess]
@@ -212,7 +198,7 @@ def load_guess_matrix():
     guess_matrix = []
     word_to_index = {}
     try:
-        guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
+        guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True)
         word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
     except FileNotFoundError:
         print('File not found')
@@ -233,21 +219,6 @@ def load_first_guess_entropy():
     except Exception as e:
         print(f'Error: {e}')
     return first_guesses
-
-def create_file(path):
-    '''
-    Creates file using the given path
-    '''
-    try:
-        file = open(path, 'x')
-        file.close()
-    except FileNotFoundError:
-        print('File not found')
-    except Exception as e:
-        print(f'Error: {e}')
-    else:
-        print('File Created')
-        
 
 if __name__ == "__main__":
     guess_matrix, word_to_index = load_guess_matrix()
