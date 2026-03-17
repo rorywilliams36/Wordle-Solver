@@ -78,6 +78,6 @@ def test_allocate_letters():
     word_filter = WordleFilter()
     word_filter.grey, word_filter.yellow, word_filter.green = word_filter.allocate_letters('irate', ['G', 'G', '_', 'Y', 'Y'])
 
-    assert word_filter.green == [('i', 0), ('r', 1)]
-    assert word_filter.yellow == [('t', 3), ('e', 4)]
+    assert word_filter.green == {('i', 0), ('r', 1)}
+    assert word_filter.yellow == {('t', 3), ('e', 4)}
     assert word_filter.grey == {'a'}
