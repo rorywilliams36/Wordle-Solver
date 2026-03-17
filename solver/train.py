@@ -52,9 +52,11 @@ class WordleTrain:
         guess_matrix = np.empty((WORD_LIST_LEN, WORD_LIST_LEN), dtype=str)
         wordle = WordleGame()
 
+        word_list = list(WORD_LIST)
+
         # Fill matrix
-        for g, guess in enumerate(list(WORD_LIST)):
-            for a, answer in enumerate(list(WORD_LIST)):
+        for g, guess in enumerate(word_list):
+            for a, answer in enumerate(word_list):
                 guess_matrix[g][a] = "".join(wordle.pattern(guess, answer))
 
         guess_matrix_path = f'{PATH}/guess_matrix.npy'
@@ -94,11 +96,10 @@ class WordleTrain:
 
         # Save values as JSON
         try:
-            with open(entropy_file_path, "w") as f:
+            with open(entropy_file_path, 'w') as f:
                 json.dump(guess_entropy, f)
         except Exception as e:
             print(f'Error: {e}')
-
 
     def solve(self, first_guess: str = None):
         '''
@@ -157,8 +158,6 @@ class WordleTrain:
                     guess = self.possible_guess_entropy(pos_guesses)
                 # if no guesses available set to unsolved
                 else:
-                    solved = True
-                    guess_num = -2
                     break
          
             num_guesses.append(guess_num)
