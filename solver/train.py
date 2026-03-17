@@ -10,7 +10,7 @@ WORD_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=st
 WORD_LIST_LEN = len(WORD_LIST)
 MAX_GUESSES = 6
 
-PATH = 'C:/Users/roryw/Documents/Wordle Solver/data'
+PATH = f'{os.path.abspath(os.getcwd())}/data'
 
 class WordleTrain:
     def __init__(self):
@@ -55,6 +55,9 @@ class WordleTrain:
             for a, answer in enumerate(list(WORD_LIST)):
                 m[g][a] = "".join(wordle.pattern(guess, answer))
 
+        if not os.path.exists(f"{PATH}/guess_matrix.npy"):
+            file = open(f"{PATH}/guess_matrix.npy", 'x')
+
         # Save matrix
         with open(f"{PATH}/guess_matrix.npy", 'wb') as f:
             np.save(f, m)
@@ -86,9 +89,21 @@ class WordleTrain:
             H = self.entropy(pattern_counts)
             guess_entropy[guess] = H
 
+        entropy_file_path = f"{PATH}/first_guess_entropy.json"
+        if not os.path.exists(entropy_file_path):
+            try:
+                file = open(entropy_file_path, 'x')
+                file.close()
+            except:
+                print('Error creating entropy file')
+                quit()
+
         # Save values as JSON
-        with open(f"{PATH}/first_guess_entropy.json", "w") as f:
-            json.dump(guess_entropy, f)             
+        try:
+            with open(entropy_file_path, "w") as f:
+                json.dump(guess_entropy, f)
+        except:
+            print('Error writing entropy file;\nfile may not exist or values are invailid format')             
 
     def solve(self, first_guess: str = None):
         '''
@@ -154,6 +169,7 @@ class WordleTrain:
                         solved = True
                         guess_num = -2
     
+                # CHANGE WHERE THIS GOES
                 guess_num += 1      
      
             num_guesses.append(guess_num)
@@ -182,19 +198,27 @@ class WordleTrain:
             # Calculate entropy for word
             H = self.entropy(pattern_counts)
             pos_guess_entropy[guess] = H
-        # print(pos_guess_entropy)
+
         return max(pos_guess_entropy, key = pos_guess_entropy.get)
 
 def load_lookup_table():
     # Load guess lookup matrix
-    guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
-    word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
-    return guess_matrix, word_to_index
+    try:
+        guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
+        word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
+        return guess_matrix, word_to_index
+    except:
+        print('Error loading guess matrix')
+        quit()
 
 def load_first_guess_entropy():
-    with open(f"{PATH}/first_guess_entropy.json", "r") as f:
-        first_guesses = json.load(f)
-    return first_guesses
+    try:
+        with open(f"{PATH}/first_guess_entropy.json", "r") as f:
+            first_guesses = json.load(f)
+        return first_guesses
+    except:
+        print('Error loading entropy values')
+        quit()
 
 if __name__ == "__main__":
     train = WordleTrain()
@@ -202,8 +226,9 @@ if __name__ == "__main__":
     # first_guess = load_first_guess_entropy()
     # print(first_guess['irate'])
     # print(max(first_guess, key = first_guess.get))
-    train.solve()
-
+    #train.solve()
+    # print(os.path.dirname(os.path.abspath(__file__)))
+    print()
     # train.lookup_table()
     # print('guess matrix complete')
     # train.find_first_guess()
