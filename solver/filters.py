@@ -29,6 +29,10 @@ class WordleFilter:
     def filter(self):
         """ 
         Removes words from the array which contain the invalid letters
+
+        Return:
+            guesses = set of words that contain yellow and green letters
+            words = set of all available words that can be guessed not containing grey letters
         """
 
         # Remove grey letters
@@ -97,6 +101,11 @@ class WordleFilter:
         Args:
             guessed_word: string of the current word guessed
             result: result using the guessed_word
+
+        Return:
+            grey: set of letters that are set to grey in result
+            yellow: set of yellow letters as (letter, index)
+            green: set of green letters (letter, index)
         '''
         for i in range(WORD_LEN):
             if result[i] == 'G':
