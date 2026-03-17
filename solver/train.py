@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from filters import WordleFilter
 from wordle_game import WordleGame
 
-WORD_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str))) # All words available in wordle
+WORD_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str)))
 WORD_LIST_LEN = len(WORD_LIST)
 MAX_GUESSES = 6
 
@@ -121,7 +121,6 @@ class WordleTrain:
             avg number of guesses for the game
         '''
 
-        filters = WordleFilter(WORD_LIST)
 
         # Set first guess
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
@@ -129,6 +128,8 @@ class WordleTrain:
 
         num_guesses = []
         for answer in list(WORD_LIST)[:50]:
+            filters = WordleFilter(WORD_LIST)
+
             guess = first_guess
             guess_num = 0
             solved = False
@@ -173,11 +174,8 @@ class WordleTrain:
                     solved = True
                     guess_num = -2
                     break
-    
-                # CHANGE WHERE THIS GOES
-     
+         
             num_guesses.append(guess_num)
-            filters.__init__(words=WORD_LIST)
         print(num_guesses)
         print(np.mean(num_guesses))
 
@@ -206,27 +204,40 @@ class WordleTrain:
         return max(pos_guess_entropy, key = pos_guess_entropy.get)
 
 def load_guess_matrix():
+    '''
+    Loads the guess matrix containing all results for each guess and answer
+    Creates an indexing tool so that the guess matrix can be correctly accessed
+    '''
     # Load guess lookup matrix
+    guess_matrix = []
+    word_to_index = {}
     try:
         guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True).tolist()
         word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
-        return guess_matrix, word_to_index
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
         print(f'Error: {e}')
+    return guess_matrix, word_to_index
 
 def load_first_guess_entropy():
+    '''
+    Loads the JSON file containing entropy values for the first guess
+    '''
+    first_guesses = {}
     try:
         with open(f"{PATH}/first_guess_entropy.json", "r") as f:
             first_guesses = json.load(f)
-        return first_guesses
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
         print(f'Error: {e}')
+    return first_guesses
 
 def create_file(path):
+    '''
+    Creates file using the given path
+    '''
     try:
         file = open(path, 'x')
         file.close()
