@@ -13,13 +13,13 @@ Grey _ = Letter is not in the word
 
 
 ANSWER = "" # Target word
-WORDLE_WORDS = set(np.loadtxt("data/wordlists/words.txt", dtype=str)) # All words available in wordle
-WORDS_LIST_LEN = len(WORDLE_WORDS)
+WORD_LIST = set(np.loadtxt("data/wordlists/words.txt", dtype=str)) # All words available in wordle
+WORDS_LIST_LEN = len(WORD_LIST)
 WORD_LEN = 5
 
 class WordleFilter:
 
-    def __init__(self, words: set = WORDLE_WORDS):
+    def __init__(self, words: set = WORD_LIST):
         self.words = words # Avaliable words that can be used
         self.guesses = set() # Contains all possible guesses
         self.green = set() # Array containing position of green letters [(letter, pos)]
@@ -82,7 +82,7 @@ class WordleFilter:
 
         for w in self.words:
             # Counter to check word contains all letters in yellow array
-            count = len([l for l, pos in self.yellow if l in w])
+            count = len([l for l, _ in self.yellow if l in w])
 
             if check != 0 and count != 0 and count == check:
                 yellow_words.add(w)
@@ -118,6 +118,7 @@ class WordleFilter:
         green_set = {c for c, _ in self.green}
         yellow_set = {c for c, _ in self.yellow}
 
+        # letters cannot be grey and yellow/green at the same time
         self.grey = self.grey - green_set - yellow_set
 
         return self.grey, self.yellow, self.green
@@ -126,9 +127,9 @@ if __name__ == "__main__":
     word_filter = WordleFilter()
 
     # temp
-    word_filter.grey = {'i', 't', 's', 'c', 'h' 'e'}
-    word_filter.yellow = []
-    word_filter.green = [('a', 2), ('r', 1)]
+    word_filter.grey = {'r', 't', 'e', 'u', 'n','d'}
+    word_filter.yellow = {('s', 0), ('o',1), ('i', 0) , ('a', 1)}
+    word_filter.green = {}
 
     word_filter.words, word_filter.guesses = word_filter.filter()
 
