@@ -6,9 +6,9 @@ MAX_GUESSES = 6
 
 class WordleGame:
 
-    def __init__(self, answer: str = None):
+    def __init__(self, answer: str = None, word_list: set = None):
         self.answer = answer
-        self.word_list = np.loadtxt('data/wordlists/words.txt', dtype = str)
+        self.word_list = word_list
         self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
         self.output = []
         self.solved = False
@@ -124,8 +124,8 @@ def print_guessed_letters(guessed_letters):
     print("Grey  :", " ".join(sorted(greys)))
     print("Unused:", " ".join(sorted(unused)))
     
-def run_game(answer):
-    wordle = WordleGame(answer)
+def run_game(word_list, answer):
+    wordle = WordleGame(answer, word_list)
  
     # Sets random word as answer if no word is set
     if wordle.answer is None:

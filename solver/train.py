@@ -3,8 +3,9 @@ import sys
 import json
 import numpy as np
 
+from solver.filters import WordleFilter
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from filters import WordleFilter
 from wordle_game import WordleGame
 
 WORD_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str)))
@@ -13,11 +14,12 @@ MAX_GUESSES = 6
 
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 
-class WordleTrain:
-    def __init__(self, guess_matrix, word_to_index, first_guess_entropy):
+class WordleSolver:
+    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_list: set = WORD_LIST):
         self.guess_matrix = guess_matrix
         self.word_to_index = word_to_index
         self.first_guess_entropy = first_guess_entropy
+        self.word_list = word_list
 
     def entropy(self, pattern_counts):
         '''
@@ -113,12 +115,12 @@ class WordleTrain:
         '''
 
 
-        # Set first guess
+        # Set first guess if none is defined
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
             first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
 
         num_guesses = []
-        for answer in list(WORD_LIST)[:50]:
+        for answer in list(WORD_LIST):
             filters = WordleFilter(WORD_LIST)
 
             guess = first_guess
@@ -154,6 +156,7 @@ class WordleTrain:
                 pos_guesses = pos_guesses - completed_guesses
 
                 # checks if there are any guesses to be made
+                # Gets the word to be guesses next
                 if len(pos_guesses) > 0:
                     guess = self.possible_guess_entropy(pos_guesses)
                 # if no guesses available set to unsolved
@@ -165,7 +168,15 @@ class WordleTrain:
         print(np.mean(num_guesses))
 
     def possible_guess_entropy(self, pos_guesses):
-        ''' Gets all possible patterns for result '''
+        ''' 
+        Calculates entropy values for all possible guesses left
+
+        Args:
+            pos_guesses: set of words that are possible answers/gueses
+
+        Returns:
+            pos_guess_entropy: dict containing entropy values for the possible guesses
+        '''
         pos_guess_entropy = {}
         # print(pos_guesses)
         for guess in pos_guesses:
@@ -188,7 +199,7 @@ class WordleTrain:
 
         return max(pos_guess_entropy, key = pos_guess_entropy.get)
 
-def load_guess_matrix():
+def load_guess_matrix(word_list):
     '''
     Loads the guess matrix containing all results for each guess and answer
     Creates an indexing tool so that the guess matrix can be correctly accessed
@@ -198,7 +209,7 @@ def load_guess_matrix():
     word_to_index = {}
     try:
         guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True)
-        word_to_index = {w:i for i,w in enumerate(WORD_LIST)} # Indexing table for each word
+        word_to_index = {w:i for i,w in enumerate(word_list)} # Indexing table for each word
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
@@ -219,9 +230,29 @@ def load_first_guess_entropy():
         print(f'Error: {e}')
     return first_guesses
 
+
+def run_gather_data(word_list):
+    solver = WordleSolver(None, {}, {}, word_list)
+    solver.create_guess_matrix()
+    solver.first_guess_entropy
+
+def run_solver(word_list, first_guess):
+    guess_matrix, word_to_index = load_guess_matrix(word_list)
+    first_guess_entropy = load_first_guess_entropy()
+
+    if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
+        print('Error loading data')
+        
+    solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_list)
+    solver.solve(first_guess)
+
 if __name__ == "__main__":
     guess_matrix, word_to_index = load_guess_matrix()
     first_guess_entropy = load_first_guess_entropy()
+
+    if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
+        print('Error loading data')
+        
     train = WordleTrain(guess_matrix, word_to_index, first_guess_entropy)
 
     # first_guess = load_first_guess_entropy()
