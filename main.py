@@ -8,7 +8,6 @@ GUESS_LIST = sorted(set(np.loadtxt("data/wordlists/guess_wordlist.txt", dtype=st
 ANSWER_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str)))
 WORD_LIST = sorted(set(np.loadtxt("data/wordlists/words.txt", dtype=str)))
 
-
 def get_wordlist(word_list_arg):
     if word_list_arg == 'guesses':
         return GUESS_LIST
@@ -20,14 +19,14 @@ def validate_word_inputs(word_list, input_word):
     if input_word is not None:
         if (input_word in word_list) or ((len(input_word) == 5) and (input_word.isalpha())):
             return input_word
-        print(f'{input_word}: is not valid to use. Your input will be randomised from the word list')
+        print(f'{input_word}: is not valid to use. The first guess will be the word with largest entropy')
     return None
 
 def validate_answer(word_list, input_word):
     if input_word is not None:
         if input_word in word_list:
             return input_word
-        print(f'{input_word}: is not valid to use. Your input will be randomised from the word list')
+        print(f'{input_word}: is not valid to use. Then answer will be randomised from the word list')
     return None
 
 
@@ -41,9 +40,9 @@ if __name__ == "__main__":
     parser.add_argument('-gs', '--game_solver', action='store_true', help="Run Game and Solver")
 
     # Set Variables
-    parser.add_argument('--set_answer', type=str, help="Set Wordle Answer (Only used when p the game)", default=None)
-    parser.add_argument('--set_wordlist', type=str, choices=['answers', 'guesses', 'most_common'], help="Set wordlist", default='most_common')
-    parser.add_argument('--set_first_guess', type=str, help='Sets first guess used in solver', default=None)
+    parser.add_argument('-sa', '--set_answer', type=str, help="Set Wordle Answer (Only used when p the game)", default=None)
+    parser.add_argument('-wl', '--set_wordlist', type=str, choices=['answers', 'guesses', 'most_common'], help="Set wordlist", default='most_common')
+    parser.add_argument('-fg', '--set_first_guess', type=str, help='Sets first guess used in solver', default=None)
     
     # Get Args
     args = parser.parse_args()
@@ -51,7 +50,6 @@ if __name__ == "__main__":
     word_list = get_wordlist(args.set_wordlist)
     answer = validate_answer(word_list, args.set_answer)
     first_guess = validate_word_inputs(word_list, args.set_first_guess)
-    print(first_guess)
 
     if args.game:
         run_game(word_list, answer)
