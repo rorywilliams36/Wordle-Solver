@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 
 from solver.filters import WordleFilter
 
@@ -15,10 +16,11 @@ MAX_GUESSES = 6
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 
 class WordleSolver:
-    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_list: set = WORD_LIST):
+    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list: set = WORD_LIST):
         self.guess_matrix = guess_matrix
         self.word_to_index = word_to_index
         self.first_guess_entropy = first_guess_entropy
+        self.word_probs = word_probs
         self.word_list = word_list
 
     def entropy(self, pattern_counts):
@@ -120,10 +122,14 @@ class WordleSolver:
             first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
 
         num_guesses = []
-        for answer in list(WORD_LIST):
+        guess_record = {}
+        guess_distribution = [0,0,0,0,0,0]
+        for answer in list(WORD_LIST)[:50]:
             filters = WordleFilter(WORD_LIST)
 
             guess = first_guess
+            entropy = self.first_guess_entropy[guess]
+            pos_guesses_remain = len(self.word_list)
             guess_num = 0
             solved = False
             print('================')
@@ -134,6 +140,8 @@ class WordleSolver:
             # as answer but in differnet order
             completed_guesses = set()
 
+            guess_record[answer] = []
+
             while (not solved) or (guess_num < MAX_GUESSES):
                 guess_num += 1      
 
@@ -141,8 +149,8 @@ class WordleSolver:
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
-
-                print(guess_num, guess)
+                print(guess_num, guess, res, entropy, pos_guesses_remain)
+                # guess_record[answer].append((guess_num, guess))
 
                 # Set guess as submitted 
                 completed_guesses.add(guess)
@@ -158,13 +166,19 @@ class WordleSolver:
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
                 if len(pos_guesses) > 0:
-                    guess = self.possible_guess_entropy(pos_guesses)
+                    pos_guess_entropys = self.possible_guess_entropy(pos_guesses)
+                    guess = max(pos_guess_entropys, key = pos_guess_entropys.get)
+                    entropy = pos_guess_entropys[guess]
+                    pos_guesses_remain = len(pos_guesses)
                 # if no guesses available set to unsolved
                 else:
                     break
          
             num_guesses.append(guess_num)
+            if guess_num <=6:
+                guess_distribution[guess_num-1] += 1
         print(num_guesses)
+        print(guess_distribution)
         print(np.mean(num_guesses))
 
     def possible_guess_entropy(self, pos_guesses):
@@ -197,8 +211,10 @@ class WordleSolver:
             H = self.entropy(pattern_counts)
             pos_guess_entropy[guess] = H
 
-        return max(pos_guess_entropy, key = pos_guess_entropy.get)
+        return pos_guess_entropy
 
+
+# Load Data
 def load_guess_matrix(word_list):
     '''
     Loads the guess matrix containing all results for each guess and answer
@@ -230,7 +246,53 @@ def load_first_guess_entropy():
         print(f'Error: {e}')
     return first_guesses
 
+def apply_sigmoid():
+    ''' Applies sigmoid function to wordlist to calculate a probability for word being the answer '''
 
+    # open wordlist
+    try:
+        with open(f"{PATH}/wordlists/words.txt", "r") as f:
+            most_likely = f.readlines()
+            f.close()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
+
+
+    # Apply sigmoid function (z)
+    most_likely.reverse()
+    most_likely_len = len(most_likely)
+    x = np.linspace(-5, 10, most_likely_len)
+    z = 1/(1 + np.exp(-x))
+
+    # Attach sigmoid value to words
+    word_prob = {}
+    for w in range(most_likely_len):
+        word = most_likely[w].strip()
+        word_prob[word] = z[w]
+
+    # Save values
+    word_prob_path = f"{PATH}/word_probabilites.json"
+    try:
+        with open(word_prob_path, 'w') as f:
+            json.dump(word_prob, f)
+    except Exception as e:
+        print(f'Error: {e}')
+
+def load_word_probs():
+    ''' Loads the file word_probs'''
+    word_probs = {}
+    try:
+        with open(f"{PATH}/word_probabilites.json", "r") as f:
+            word_probs = json.load(f)
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
+    return word_probs
+
+# Main Functions
 def run_gather_data(word_list):
     solver = WordleSolver(None, {}, {}, word_list)
     solver.create_guess_matrix()
@@ -239,28 +301,23 @@ def run_gather_data(word_list):
 def run_solver(word_list, first_guess):
     guess_matrix, word_to_index = load_guess_matrix(word_list)
     first_guess_entropy = load_first_guess_entropy()
+    word_probs = load_word_probs()
 
-    if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
+    if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0) or (len(word_probs) == 0):
         print('Error loading data')
+        sys.exit()
         
-    solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_list)
+    solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list)
     solver.solve(first_guess)
 
+
 if __name__ == "__main__":
-    guess_matrix, word_to_index = load_guess_matrix()
-    first_guess_entropy = load_first_guess_entropy()
+    apply_sigmoid()
+    # guess_matrix, word_to_index = load_guess_matrix()
+    # first_guess_entropy = load_first_guess_entropy()
 
-    if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
-        print('Error loading data')
+    # if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
+    #     print('Error loading data')
         
-    train = WordleTrain(guess_matrix, word_to_index, first_guess_entropy)
-
-    # first_guess = load_first_guess_entropy()
-    # print(first_guess['irate'])
-    # print(max(first_guess, key = first_guess.get))
-    train.solve()
-    # print(os.path.dirname(os.path.abspath(__file__)))
-    # train.lookup_table()
-    # print('guess matrix complete')
-    # train.find_first_guess()
-    # print('first guesses complete')
+    # train = WordleTrain(guess_matrix, word_to_index, first_guess_entropy)
+    # train.solve()
