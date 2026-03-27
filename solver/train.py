@@ -81,9 +81,9 @@ class WordleSolver:
 
         guess_entropy = {}
 
-        for guess in WORD_LIST:
+        for guess in self.word_list:
             pattern_counts = {}
-            for answer in WORD_LIST:
+            for answer in self.word_list:
                 # Lookup result for guess and answer
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
@@ -127,8 +127,8 @@ class WordleSolver:
         num_guesses = []
         guess_record = {}
         guess_distribution = [0,0,0,0,0,0]
-        for answer in list(WORD_LIST)[:10]:
-            filters = WordleFilter(WORD_LIST)
+        for answer in list(self.word_list)[:10]:
+            filters = WordleFilter(self.word_list)
 
             guess = first_guess
             entropy = self.first_guess_entropy[guess]
@@ -152,7 +152,6 @@ class WordleSolver:
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
-                print(self.guess_matrix)
                 print(guess_num, guess, res, entropy, pos_guesses_remain)
                 # guess_record[answer].append((guess_num, guess))
 
