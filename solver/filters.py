@@ -37,38 +37,57 @@ class WordleFilter:
 
         self.guesses = set()
 
+        self.words = [w for w in self.words if (not (set(w) & self.grey))]
+        
+        green_check = len(self.green)
+        yellow_check = len(self.yellow)
+
         for word in self.words:
             valid = True
 
             # Check Green
+            green_count = 0
             for l, pos in self.green:
                 if word[pos] != l:
                     valid = False
                     break
+                else:
+                    green_count += 1
+
+            if green_count != green_check:
+                valid = False
+
             if not valid:
                 continue
 
             # Check Yellows
+            yellow_count = 0
             for l, pos in self.yellow:
                 if (l not in set(word)):
                     valid = False
                     break
-                if word[pos] == l:
+                elif word[pos] == l:
                     valid = False
                     break
+                else:
+                    yellow_count += 1
+
+            if yellow_check != yellow_count:
+                valid = False
+            
             if not valid: 
                 continue
 
             # Check Greys
-            for l in self.grey:
-                if l in word:
-                    valid = False
-                    break
-            
+            # for l in self.grey:
+            #     if l in word:
+            #         valid = False
+            #         break
+
             # Add word if allowed
             if valid:
                 self.guesses.add(word)
-                
+
         return self.guesses
 
     def allocate_letters(self, guessed_word, result):
