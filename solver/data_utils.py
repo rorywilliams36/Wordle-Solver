@@ -87,16 +87,21 @@ def apply_sigmoid():
 
 
     # Apply sigmoid function (z)
-    most_likely.reverse()
-    most_likely_len = len(most_likely)
-    x = np.linspace(-5, 10, most_likely_len)
-    z = 1/(1 + np.exp(-x))
 
     # Attach sigmoid value to words
     word_prob = {}
-    for w in range(most_likely_len):
-        word = most_likely[w].strip()
-        word_prob[word] = z[w]
+
+    N = len(most_likely) # number of values
+    alpha = 15 # how fast values drop
+    beta = 0.35 # sets midpoint of curve (35% word is 0.5)
+    for rank, word in enumerate(most_likely):
+        word = most_likely[rank].strip()
+
+        x = (rank) / (N - 1)
+        z = 1/(1 + np.exp(alpha*(x - beta)))
+        word_prob[word] = z
+
+    print(word_prob)
 
     # Save values
     word_prob_path = f"{PATH}/word_probabilites.json"
