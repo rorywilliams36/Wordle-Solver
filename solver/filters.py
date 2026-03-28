@@ -35,64 +35,35 @@ class WordleFilter:
             words = set of all available words that can be guessed not containing grey letters
         """
 
-        # Remove grey letters
-        self.words = self.remove_greys()
+        self.guesses = set()
 
-        green_words = self.get_greens()
-        yellow_words = self.get_yellows()
+        for word in self.words:
+            valid = True
+            for l, pos in self.green:
+                if word[pos] != l:
+                    valid = False
+                    break
+            if not valid:
+                continue
 
-        # Gets possible guesses
-        if (len(green_words) == 0) and (len(yellow_words) == 0):
-            self.guesses = self.words
-        elif (len(green_words) == 0) and (len(yellow_words) > 0):
-            self.guesses = yellow_words
-        elif (len(green_words) > 0) and (len(yellow_words) == 0):
-            self.guesses = green_words
-        else:
-            # Get common words from yellow and green sets by & operation
-            self.guesses = green_words & yellow_words
+            for l, pos in self.yellow:
+                if (l not in set(word)):
+                    valid = False
+                    break
+                if word[pos] == l:
+                    valid = False
+                    break
+            if not valid: 
+                continue
 
-        return self.words, self.guesses
-
-    def get_greens(self):
-        """
-        Returns a set of words with already correct letters (greens)
-        """
-        
-        green_words = set()
-        check = len(self.green)
-
-        for w in self.words:
-            # counter to check if word contains all letters in green array
-            count = len([l for l, pos in self.green if w[pos] == l])
-
-            # if the word contains all green letters add to array
-            if check != 0 and count != 0 and count == check:
-                green_words.add(w)
-
-        return green_words
-
-    def get_yellows(self):
-        """
-        Returns set of words which only contain yellow letters
-        """
-
-        check = len(self.yellow)
-        yellow_words = set()
-
-        for w in self.words:
-            # Counter to check word contains all letters in yellow array
-            # May change used to not have the second part of and statement
-            count = len([l for l, pos in self.yellow if ((l in w) and (w[pos] != l))])
-
-            if check != 0 and count != 0 and count == check:
-                yellow_words.add(w)
-
-        return yellow_words
-
-    def remove_greys(self):
-        ''' Removes all words from the word list that contain grey letters '''
-        return set([w for w in self.words if not (set(w) & self.grey)])
+            for l in self.grey:
+                if l in word:
+                    valid = False
+                    break
+    
+            if valid:
+                self.guesses.add(word)
+        return self.guesses
 
     def allocate_letters(self, guessed_word, result):
         '''
@@ -128,13 +99,15 @@ if __name__ == "__main__":
     word_filter = WordleFilter()
 
     # temp
-    word_filter.grey = {'r', 't', 'e', 'u', 'n','d'}
-    word_filter.yellow = {('s', 0), ('o',1), ('i', 0) , ('a', 1)}
+    word_filter.grey = {'i', 'r', 'e', 'u', 'n', 'd', 's'}
+    word_filter.yellow = {('a', 2), ('t', 3), ('o', 2)}
     word_filter.green = {}
 
-    word_filter.words, word_filter.guesses = word_filter.filter()
+    word_filter.guesses = word_filter.filter()
+    new_guesses = word_filter.new_filter()
 
     # scores = word_filter.get_guess_scores()
     # print(word_filter.words)
     print(word_filter.guesses)
+    print(new_guesses)
 
