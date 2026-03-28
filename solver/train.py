@@ -9,13 +9,14 @@ import solver.data_utils as d_utils
 
 MAX_GUESSES = 6
 
+# File path and Names
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 GUESS_ENTROPYS = 'first_guess_entropy'
 WORD_PROBS = 'word_probabilites'
 
 
 class WordleSolver:
-    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list: set = WORD_LIST):
+    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list):
         self.guess_matrix = guess_matrix
         self.word_to_index = word_to_index
         self.first_guess_entropy = first_guess_entropy
@@ -61,14 +62,16 @@ class WordleSolver:
             guess_record[answer] = []
 
             while (not solved) or (guess_num < MAX_GUESSES):
-                guess_num += 1      
+                guess_num += 1
+
+                max_entropy = -np.log2(1/pos_guesses_remain)      
 
                 # gets result for chosen guess
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
                 # print(guess_num, guess, res, entropy, pos_guesses_remain)
-                # guess_record[answer].append((guess_num, guess))
+                guess_record[answer].append((guess_num, guess, res, entropy, pos_guesses_remain))
 
                 # Set guess as submitted 
                 completed_guesses.add(guess)
@@ -84,10 +87,12 @@ class WordleSolver:
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
                 if len(pos_guesses) > 0:
-                    pos_guess_entropys = self.possible_guess_entropy(pos_guesses)
+                    pos_guess_entropys = self.possible_guess_entropy(pos_guesses, max_entropy)
                     guess = max(pos_guess_entropys, key = pos_guess_entropys.get)
                     entropy = pos_guess_entropys[guess]
                     pos_guesses_remain = len(pos_guesses)
+                    #print(max_entropy)
+                    
                 # if no guesses available set to unsolved
                 else:
                     break
@@ -99,12 +104,14 @@ class WordleSolver:
                 solved = True
                 guess_distribution[-1] += 1
                 print(answer)
+                print(guess_record[answer])
+                print('========================')
 
         # print(num_guesses)
         print(guess_distribution)
         print(np.mean(num_guesses))
 
-    def possible_guess_entropy(self, pos_guesses):
+    def possible_guess_entropy(self, pos_guesses, max_entropy):
         ''' 
         Calculates entropy values for all possible guesses left
 
@@ -132,7 +139,14 @@ class WordleSolver:
 
             # Calculate entropy for word
             H = entropy(pattern_counts)
-            pos_guess_entropy[guess] = H
+            if not self.word_probs.get(guess):
+                word_prob = self.word_probs['pupal'] * 0.1
+            else:
+                word_prob = self.word_probs[guess]
+
+            score = expected_score(H, word_prob, max_entropy)
+            # print(guess, H, score, max_entropy, word_prob)
+            pos_guess_entropy[guess] = score
 
         return pos_guess_entropy
 
@@ -159,9 +173,14 @@ def entropy(pattern_counts):
 
     return H
 
+def expected_score(H, word_prob, max_entropy):
+    entropy_ratio = H / max_entropy
+    return entropy_ratio +  word_prob
+
 # Main Functions
 def run_gather_data(word_list):
-    solver = WordleSolver(None, {}, {}, word_list)
+    ''' Runs functions used to create/calculate the data needed to run solver'''
+    solver = WordleSolver(None, {}, {}, {}, word_list)
     d_utils.create_guess_matrix(word_list)
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
     d_utils.find_first_guess(word_list, word_to_index, guess_matrix)
