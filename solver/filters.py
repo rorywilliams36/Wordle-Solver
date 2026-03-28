@@ -39,6 +39,8 @@ class WordleFilter:
 
         for word in self.words:
             valid = True
+
+            # Check Green
             for l, pos in self.green:
                 if word[pos] != l:
                     valid = False
@@ -46,6 +48,7 @@ class WordleFilter:
             if not valid:
                 continue
 
+            # Check Yellows
             for l, pos in self.yellow:
                 if (l not in set(word)):
                     valid = False
@@ -56,13 +59,16 @@ class WordleFilter:
             if not valid: 
                 continue
 
+            # Check Greys
             for l in self.grey:
                 if l in word:
                     valid = False
                     break
-    
+            
+            # Add word if allowed
             if valid:
                 self.guesses.add(word)
+                
         return self.guesses
 
     def allocate_letters(self, guessed_word, result):
