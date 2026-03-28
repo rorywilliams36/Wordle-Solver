@@ -82,7 +82,8 @@ class WordleFilter:
 
         for w in self.words:
             # Counter to check word contains all letters in yellow array
-            count = len([l for l, _ in self.yellow if l in w])
+            # May change used to not have the second part of and statement
+            count = len([l for l, pos in self.yellow if ((l in w) and (w[pos] != l))])
 
             if check != 0 and count != 0 and count == check:
                 yellow_words.add(w)
