@@ -43,7 +43,7 @@ class WordleSolver:
         num_guesses = []
         guess_record = {}
         guess_distribution = [0,0,0,0,0,0,0]
-        for answer in list(self.word_list):
+        for answer in list(self.word_list)[:10]:
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
@@ -51,8 +51,8 @@ class WordleSolver:
             pos_guesses_remain = len(self.word_list)
             guess_num = 0
             solved = False
-            # print('================')
-            # print(answer)
+            print('================')
+            print(answer)
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
@@ -70,7 +70,7 @@ class WordleSolver:
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
-                # print(guess_num, guess, res, entropy, pos_guesses_remain)
+                print(guess_num, guess, res, entropy, pos_guesses_remain)
                 guess_record[answer].append((guess_num, guess, res, entropy, pos_guesses_remain))
 
                 # Set guess as submitted 
@@ -81,7 +81,7 @@ class WordleSolver:
                 
                 # finds possible guesses based on the result
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
-                _, pos_guesses = filters.filter()
+                pos_guesses = filters.filter()
                 pos_guesses = pos_guesses - completed_guesses
 
                 # checks if there are any guesses to be made
@@ -125,11 +125,20 @@ class WordleSolver:
         # print(pos_guesses)
         for guess in pos_guesses:
             pattern_counts = {}
+            worst_case = 0
+
             for answer in pos_guesses:
                 # Lookup result for guess and answer
+                pos_filtered = WordleFilter(pos_guesses)
+
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
+
+                pos_filtered.grey, pos_filtered.yellow, pos_filtered.green = pos_filtered.allocate_letters(guess, res)
+                pos_left = pos_filtered.filter()
+
+                worst_case = max(worst_case, len(pos_left))
 
                 # Increment result occurence
                 if pattern_counts.get(res):
@@ -144,7 +153,8 @@ class WordleSolver:
             else:
                 word_prob = self.word_probs[guess]
 
-            score = expected_score(H, word_prob, max_entropy)
+            words_left_ratio = worst_case / len(pos_guesses)
+            score = expected_score(H, word_prob, max_entropy, words_left_ratio)
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_entropy[guess] = score
 
@@ -173,9 +183,9 @@ def entropy(pattern_counts):
 
     return H
 
-def expected_score(H, word_prob, max_entropy):
+def expected_score(H, word_prob, max_entropy, word_left):
     entropy_ratio = H / max_entropy
-    return entropy_ratio +  word_prob
+    return entropy_ratio +  word_prob - word_left
 
 # Main Functions
 def run_gather_data(word_list):
