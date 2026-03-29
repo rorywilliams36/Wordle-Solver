@@ -43,7 +43,7 @@ class WordleFilter:
         yellow_check = len(self.yellow)
 
         for word in self.words:
-            word = set(word)
+            set_word = set(word)
 
             valid = True
 
@@ -65,7 +65,7 @@ class WordleFilter:
             # Check Yellows
             yellow_count = 0
             for l, pos in self.yellow:
-                if (l not in word):
+                if (l not in set_word):
                     valid = False
                     break
                 elif word[pos] == l:
