@@ -46,7 +46,7 @@ class WordleSolver:
         num_guesses = []
         guess_record = {}
         guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
-        for i, answer in enumerate(list(self.word_list)):
+        for i, answer in enumerate(list(self.word_list)[:50]):
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
@@ -54,8 +54,8 @@ class WordleSolver:
             pos_guesses_remain = N
             guess_num = 0
             solved = False
-            # print('================')
-            # print(answer)
+            print('================')
+            print(answer)
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
@@ -74,7 +74,7 @@ class WordleSolver:
                 res = self.guess_matrix[g_idx][a_idx]
 
                 # add guess to record
-                # print(guess_num, guess, res, entropy, pos_guesses_remain)
+                print(guess_num, guess, res, entropy, pos_guesses_remain)
                 guess_record[answer].append((guess_num, guess, res, entropy, pos_guesses_remain))
 
                 # Set guess as submitted 
@@ -87,7 +87,7 @@ class WordleSolver:
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
                 pos_guesses, allowed_guesses = filters.filter()
                 pos_guesses = pos_guesses - completed_guesses
-                allowed_guesses = allowed_guesses - completed_guesses
+                allowed_guesses = set(allowed_guesses) - completed_guesses
 
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
@@ -135,7 +135,6 @@ class WordleSolver:
         # Change to all allowed guesses
         for guess in pos_guesses:
             pattern_counts = {}
-            worst_case = 0
 
             # change to all possible answers
             for answer in pos_guesses:
@@ -147,21 +146,12 @@ class WordleSolver:
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
 
-                # get possible answers after guess
-                pos_filtered.grey, pos_filtered.yellow, pos_filtered.green = pos_filtered.allocate_letters(guess, res)
-                pos_left = pos_filtered.filter()
-
-                # worst case number of possible answers left after guess
-                worst_case = max(worst_case, len(pos_left))
-
                 # Increment result occurence
-                if pattern_counts.get(res):
-                    pattern_counts[res] += 1
-                else:
-                    pattern_counts[res] = 1
+                pattern_counts[res] = pattern_counts.get(res, 0) + 1
 
             # Calculate entropy for word
             H = entropy(pattern_counts)
+            worst_case = max(pattern_counts.values())
 
             # Get word probability
             # Add clause if word not in possible answers set word prob to 0
