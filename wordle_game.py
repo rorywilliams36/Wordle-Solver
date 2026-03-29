@@ -4,7 +4,7 @@ import string
 """ 
 Wordle Game
 
-This Module Contains Code for Wordle Game 
+This module contains game logic for Wordle  
 
 Aim to guess a five letter word in 6 guesses using the result that
 categorises each letter in the guess
@@ -45,15 +45,15 @@ class WordleGame:
 
     def game(self, guess):
         '''
-        Returns a string of indicating what letters are correct from the guess
-        Contains most game logic
-        Also computes a dict containing letters used
+        Function containing majority of the game logic
+        After each guess adds the result to a dict containing all letters used
 
         Args:
-            guess: string of user's guessed/inputted word
+            guess: word that has been guessed (str)
+        
+        Returns:
+            output: string of indicating what letters are correct from the guess
 
-        Return:
-            output: result comparing the answer and the guess
         '''
         
         # Gets result from guess compared to answer
