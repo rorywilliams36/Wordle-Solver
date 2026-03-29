@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,33 +36,34 @@ class WordleSolver:
             avg number of guesses for the game
         '''
 
-
+        N = len(self.word_list)
         # Set first guess if none is defined
+        first_entropy = 0
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
             first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
+            first_entropy = self.first_guess_entropy[first_guess]
 
         num_guesses = []
         guess_record = {}
-        guess_distribution = [0,0,0,0,0,0,0]
-        for answer in list(self.word_list)[:10]:
+        guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
+        for i, answer in enumerate(list(self.word_list)):
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
-            entropy = self.first_guess_entropy[guess]
-            pos_guesses_remain = len(self.word_list)
+            entropy = first_entropy
+            pos_guesses_remain = N
             guess_num = 0
             solved = False
-            print('================')
-            print(answer)
+            # print('================')
+            # print(answer)
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
             # as answer but in differnet order
             completed_guesses = set()
-
             guess_record[answer] = []
 
-            while (not solved) or (guess_num < MAX_GUESSES):
+            while (not solved):
                 guess_num += 1
 
                 max_entropy = -np.log2(1/pos_guesses_remain)      
@@ -70,7 +72,9 @@ class WordleSolver:
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
-                print(guess_num, guess, res, entropy, pos_guesses_remain)
+
+                # add guess to record
+                # print(guess_num, guess, res, entropy, pos_guesses_remain)
                 guess_record[answer].append((guess_num, guess, res, entropy, pos_guesses_remain))
 
                 # Set guess as submitted 
@@ -81,8 +85,9 @@ class WordleSolver:
                 
                 # finds possible guesses based on the result
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
-                pos_guesses = filters.filter()
+                pos_guesses, allowed_guesses = filters.filter()
                 pos_guesses = pos_guesses - completed_guesses
+                allowed_guesses = allowed_guesses - completed_guesses
 
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
@@ -97,8 +102,9 @@ class WordleSolver:
                 else:
                     break
          
+            # record guess number
             num_guesses.append(guess_num)
-            if guess_num <=6:
+            if guess_num <= 9:
                 guess_distribution[guess_num-1] += 1
             else:
                 solved = True
@@ -106,6 +112,8 @@ class WordleSolver:
                 print(answer)
                 print(guess_record[answer])
                 print('========================')
+
+            progress_bar(i, N)
 
         # print(num_guesses)
         print(guess_distribution)
@@ -122,22 +130,28 @@ class WordleSolver:
             pos_guess_entropy: dict containing entropy values for the possible guesses
         '''
         pos_guess_entropy = {}
-        # print(pos_guesses)
+        pos_guess_len = len(pos_guesses)
+        worst_word_prob = self.word_probs['pupal'] * 0.1
+        # Change to all allowed guesses
         for guess in pos_guesses:
             pattern_counts = {}
             worst_case = 0
 
+            # change to all possible answers
             for answer in pos_guesses:
                 # Lookup result for guess and answer
                 pos_filtered = WordleFilter(pos_guesses)
 
+                # get result
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
 
+                # get possible answers after guess
                 pos_filtered.grey, pos_filtered.yellow, pos_filtered.green = pos_filtered.allocate_letters(guess, res)
                 pos_left = pos_filtered.filter()
 
+                # worst case number of possible answers left after guess
                 worst_case = max(worst_case, len(pos_left))
 
                 # Increment result occurence
@@ -148,12 +162,16 @@ class WordleSolver:
 
             # Calculate entropy for word
             H = entropy(pattern_counts)
+
+            # Get word probability
+            # Add clause if word not in possible answers set word prob to 0
             if not self.word_probs.get(guess):
-                word_prob = self.word_probs['pupal'] * 0.1
+                word_prob = worst_word_prob
             else:
                 word_prob = self.word_probs[guess]
 
-            words_left_ratio = worst_case / len(pos_guesses)
+            # get score
+            words_left_ratio = worst_case / pos_guess_len
             score = expected_score(H, word_prob, max_entropy, words_left_ratio)
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_entropy[guess] = score
@@ -208,6 +226,12 @@ def run_solver(word_list, first_guess):
     solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list)
     solver.solve(first_guess)
 
+def progress_bar(current, total, bar_length=30):
+    percent = current / total
+    filled_length = int(bar_length * percent)
+    bar = '#' * filled_length + '-' * (bar_length - filled_length)
+    sys.stdout.write(f'\r[{bar}] {current}/{total} words')
+    sys.stdout.flush()
 
 if __name__ == "__main__":
     # guess_matrix, word_to_index = load_guess_matrix()
