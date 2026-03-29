@@ -1,12 +1,17 @@
 import os
 import sys
-import time
-import json
 import numpy as np
-import matplotlib.pyplot as plt
 
 from solver.filters import WordleFilter
 import solver.data_utils as d_utils
+
+"""
+train
+
+This module contains code used to solve and give recommnedation guesses for Wordle
+
+"""
+
 
 MAX_GUESSES = 6
 
@@ -17,6 +22,18 @@ WORD_PROBS = 'word_probabilites'
 
 
 class WordleSolver:
+    '''
+    Wordle Solver Class:
+    Contains relevant functions to be used to help solve the Wordle game
+
+    Attributes: 
+        guess_matrix: array containing all possible results for a given guess and answer combination
+        word_to_index: dict that contains a given words index in the guess matrix
+        first_guess_entropy: contains all word's entropy values when the word is used as the first guess
+        word_probs: dict containing the probability that the word is likely to be the answer
+        word_list: array of words available to be used as guesses and answers
+    '''
+    
     def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list):
         self.guess_matrix = guess_matrix
         self.word_to_index = word_to_index
@@ -48,7 +65,7 @@ class WordleSolver:
         guess_record = {}
         guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
 
-        for i, answer in enumerate(['willy', 'wound', 'hound', 'tight', 'wooly']):
+        for i, answer in enumerate(list(self.word_list)):
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
@@ -56,8 +73,8 @@ class WordleSolver:
             pos_answers_remain = N
             guess_num = 0
             solved = False
-            print('================')
-            print(answer)
+            # print('================')
+            # print(answer)
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
@@ -76,7 +93,7 @@ class WordleSolver:
                 res = self.guess_matrix[g_idx][a_idx]
 
                 # add guess to record
-                print(guess_num, guess, res, entropy, pos_answers_remain)
+                # print(guess_num, guess, res, entropy, pos_answers_remain)
                 guess_record[answer].append((guess_num, guess, res, entropy, pos_answers_remain))
 
                 # Set guess as submitted 
@@ -98,7 +115,6 @@ class WordleSolver:
                     guess = max(pos_guess_scores, key = pos_guess_scores.get)
                     entropy = pos_guess_scores[guess]
                     pos_answers_remain = len(pos_answers)
-                    #print(max_entropy)
                     
                 # if no guesses available set to unsolved
                 else:
@@ -111,9 +127,12 @@ class WordleSolver:
             else:
                 solved = True
                 guess_distribution[-1] += 1
-                print(answer)
+
+            if guess_num > 6:
+                print(f'\n{answer}')
                 print(guess_record[answer])
                 print('========================')
+
 
             progress_bar(i, N)
 
@@ -123,14 +142,14 @@ class WordleSolver:
 
     def get_possible_guess_scores(self, pos_answers, allowed_guesses, max_entropy):
         ''' 
-        Calculates entropy values for all possible guesses left
+        Calculates expected score for all possible guesses left
 
         Args:
             pos_answers: set of words that are possible answers
             allowed_guesses: set of words that dont contain grey letters (contains words not possible to be answers)
 
         Returns:
-            pos_guess_entropy: dict containing entropy values for the possible guesses
+            pos_guess_scores: dict containing entropy values for the possible guesses
         '''
         pos_guess_entropy = {}
         pos_guess_stats = {}
@@ -142,9 +161,6 @@ class WordleSolver:
 
             for answer in pos_answers:
                 # Lookup result for guess and answer
-                pos_filtered = WordleFilter(pos_answers)
-
-                # get result
                 g_idx = self.word_to_index[guess]
                 a_idx = self.word_to_index[answer]
                 res = self.guess_matrix[g_idx][a_idx]
@@ -179,9 +195,10 @@ class WordleSolver:
 
         sorted_guess_stats = sorted(pos_guess_stats.items(), key=lambda item: item[1][4], reverse=True)
         
-        for i in range(10):
-            print(sorted_guess_stats[i])
-        print('============')
+        # for i in range(10):
+        #     if i < len(sorted_guess_stats):
+        #         print(sorted_guess_stats[i])
+        # print('============')
 
         return pos_guess_entropy
 
@@ -209,12 +226,27 @@ def entropy(pattern_counts):
     return H
 
 def expected_score(H, word_prob, max_entropy, word_left):
+    ''' 
+    Calculates the expected score of a word
+    Combines the entropy ratio, word proability and worst case of possible answers left into a single metric
+
+    Args:
+        H: entropy value for that guess
+        word_prob: probability the guess is likely the answer (defined using sigmoid function)
+        max_entropy: the maximum value entropy can be for that guess (also known as uncertainty)
+        word_left: ratio between the worst case of possible answerx left after the guess and number of possible answers currently
+    '''
     entropy_ratio = H / max_entropy
     return entropy_ratio +  word_prob + word_left
 
 # Main Functions
 def run_gather_data(word_list):
-    ''' Runs functions used to create/calculate the data needed to run solver'''
+    ''' 
+    Runs functions used to create/calculate the data needed to run solver
+
+    Args:
+        word_list: list/set of words defined in program args
+    '''
     solver = WordleSolver(None, {}, {}, {}, word_list)
     d_utils.create_guess_matrix(word_list)
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
@@ -222,6 +254,13 @@ def run_gather_data(word_list):
     d_utils.apply_sigmoid()
 
 def run_solver(word_list, first_guess):
+    ''' 
+    Runs simulation of every possible wordle game
+    
+    Args:
+        word_list: list/set of words defined in program args
+        first_guess: word set to be the first guess in all games defined in program args 
+    '''
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
     first_guess_entropy = d_utils.load_json(GUESS_ENTROPYS)
     word_probs = d_utils.load_json(WORD_PROBS)
@@ -234,18 +273,9 @@ def run_solver(word_list, first_guess):
     solver.solve(first_guess)
 
 def progress_bar(current, total, bar_length=30):
+    '''Progress bar'''
     percent = current / total
     filled_length = int(bar_length * percent)
-    bar = '#' * filled_length + '-' * (bar_length - filled_length)
-    sys.stdout.write(f'\r[{bar}] {current}/{total} words')
+    p_bar = '#' * filled_length + '-' * (bar_length - filled_length)
+    sys.stdout.write(f'\r[{p_bar}] {current}/{total} words')
     sys.stdout.flush()
-
-if __name__ == "__main__":
-    # guess_matrix, word_to_index = load_guess_matrix()
-    # first_guess_entropy = load_first_guess_entropy()
-
-    # if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0):
-    #     print('Error loading data')
-        
-    train = WordleTrain(guess_matrix, word_to_index, first_guess_entropy)
-    train.solve()

@@ -1,10 +1,35 @@
-import random, string
-import numpy as np
+import random
+import string
+
+""" 
+Wordle Game
+
+This Module Contains Code for Wordle Game 
+
+Aim to guess a five letter word in 6 guesses using the result that
+categorises each letter in the guess
+
+Green letter G = Letter is in the answer and also the correct position
+Yellow Y = Letter is in the word but wrong position
+Grey _ = Letter is not in the word
+
+"""
 
 WORD_LEN = 5
 MAX_GUESSES = 6
 
 class WordleGame:
+    ''' 
+    Wordle Game class
+
+    Attributes:
+        answer: word set as answer in the game (str)
+        word_list: list of words that are available to be guessed and set as answers
+        guessed_letters: dict containing which letters have been catergorised after each guess (grey, yellow, green)
+        output: result from the current guess
+        solved: bool indicating if the answer has bee guessed
+        num_guesses: int indicating the current guess number
+    '''
 
     def __init__(self, answer: str = None, word_list: set = None):
         self.answer = answer
@@ -19,7 +44,7 @@ class WordleGame:
         return random.choice(self.word_list)
 
     def game(self, guess):
-        """
+        '''
         Returns a string of indicating what letters are correct from the guess
         Contains most game logic
         Also computes a dict containing letters used
@@ -29,7 +54,7 @@ class WordleGame:
 
         Return:
             output: result comparing the answer and the guess
-        """
+        '''
         
         # Gets result from guess compared to answer
         self.output = self.pattern(guess, self.answer)
@@ -53,7 +78,7 @@ class WordleGame:
         return self.output
 
     def pattern(self, guess, answer):
-        """
+        '''
         Returns a string of indicating what letters are correct from the guess
         G = Green
         Y = Yellow
@@ -64,7 +89,7 @@ class WordleGame:
 
         Return:
             output: result comparing the answer and the guess
-        """
+        '''
         self.output = ["."] * WORD_LEN
         answer_letters = list(answer)
 
@@ -125,6 +150,14 @@ def print_guessed_letters(guessed_letters):
     print("Unused:", " ".join(sorted(unused)))
     
 def run_game(word_list, answer):
+    '''
+    Main function to run game
+
+    args:
+        word_list: list of words defined in program args
+        answer: word set as answer to the game in program args
+    '''
+
     wordle = WordleGame(answer, word_list)
  
     # Sets random word as answer if no word is set

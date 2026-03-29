@@ -6,6 +6,14 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from wordle_game import WordleGame
 
+"""
+Data Utils
+
+This module contains functions in the writing and loading files in the /data folder
+
+"""
+
+
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 
 
@@ -38,9 +46,7 @@ def create_guess_matrix(word_list):
         print(f"Error: {e}")
 
 def find_first_guess(word_list, word_to_index, guess_matrix):
-    '''
-    Calculates the expected information gained for every word as a first guess
-    '''
+    ''' Calculates the expected information gained for every word as a first guess '''
     from solver.train import entropy
 
     guess_entropy = {}
@@ -130,13 +136,12 @@ def load_guess_matrix(word_list):
     return guess_matrix, word_to_index
 
 def load_json(f_name):
-    '''
-    Loads the JSON file given by f_name
-    '''
+    ''' Loads the JSON file given by f_name '''
     json_file = {}
     try:
         with open(f"{PATH}/{f_name}.json", "r") as f:
             json_file = json.load(f)
+            f.close()
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
