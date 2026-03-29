@@ -37,6 +37,7 @@ class WordleSolver:
         '''
 
         N = len(self.word_list)
+        first_guess = None
         # Set first guess if none is defined
         first_entropy = 0
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
@@ -46,7 +47,8 @@ class WordleSolver:
         num_guesses = []
         guess_record = {}
         guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
-        for i, answer in enumerate(list(self.word_list)[157:210]):
+
+        for i, answer in enumerate(['willy', 'wound', 'hound', 'tight', 'wooly']):
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
@@ -125,18 +127,19 @@ class WordleSolver:
 
         Args:
             pos_answers: set of words that are possible answers
+            allowed_guesses: set of words that dont contain grey letters (contains words not possible to be answers)
 
         Returns:
             pos_guess_entropy: dict containing entropy values for the possible guesses
         '''
         pos_guess_entropy = {}
-        pos_guess_len = len(pos_answers)
+        pos_guess_stats = {}
+        pos_answers_len = len(pos_answers)
         worst_word_prob = self.word_probs['pupal'] * 0.1
-        # Change to all allowed guesses
+
         for guess in allowed_guesses:
             pattern_counts = {}
 
-            # change to all possible answers
             for answer in pos_answers:
                 # Lookup result for guess and answer
                 pos_filtered = WordleFilter(pos_answers)
@@ -151,22 +154,34 @@ class WordleSolver:
 
             # Calculate entropy for word
             H = entropy(pattern_counts)
+
+            # finds the worst case of words left
+            # same pattern/results will result in the same size answer list
             worst_case = max(pattern_counts.values())
 
+
             # Get word probability
-            # Add clause if word not in possible answers set word prob to 0
+            # if guess is not a possible answer
             if guess not in pos_answers:
                 word_prob = 0
+            # if guess is an uncommon word set probability to unlikely
             elif not self.word_probs.get(guess):
                 word_prob = worst_word_prob
             else:
                 word_prob = self.word_probs[guess]
 
             # get score
-            words_left_ratio = worst_case / pos_guess_len
+            words_left_ratio = 1- (worst_case / pos_answers_len)
             score = expected_score(H, word_prob, max_entropy, words_left_ratio)
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_entropy[guess] = score
+            pos_guess_stats[guess] = [worst_case, words_left_ratio, H, H/max_entropy, score]
+
+        sorted_guess_stats = sorted(pos_guess_stats.items(), key=lambda item: item[1][4], reverse=True)
+        
+        for i in range(10):
+            print(sorted_guess_stats[i])
+        print('============')
 
         return pos_guess_entropy
 
@@ -195,7 +210,7 @@ def entropy(pattern_counts):
 
 def expected_score(H, word_prob, max_entropy, word_left):
     entropy_ratio = H / max_entropy
-    return entropy_ratio +  word_prob - word_left
+    return entropy_ratio +  word_prob + word_left
 
 # Main Functions
 def run_gather_data(word_list):
