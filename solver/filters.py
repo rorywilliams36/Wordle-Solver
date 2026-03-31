@@ -52,9 +52,6 @@ class WordleFilter:
 
         self.words = self.remove_greys()
         
-        green_check = len(self.green)
-        yellow_check = len(self.yellow)
-
         for word in self.words:
             set_word = set(word)
             valid = True
@@ -190,13 +187,16 @@ if __name__ == "__main__":
     word_filter = WordleFilter()
 
     # temp
-    word_filter.grey = {'i', 'r', 'e', 'u', 'n', 'd', 's'}
-    word_filter.yellow = {('a', 2), ('t', 3), ('o', 2)}
-    word_filter.green = {}
+    word_filter.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
+    word_filter.yellow = [('a', 2), ('n', 4), ('e', 2)]
+    word_filter.green = [('a', 0)]
 
-    # word_filter.pos_answers, allowed_guesses = word_filter.filter()
+    word_filter.min_counts = {'a': 1, 'n': 1, 'e': 1}
+    word_filter.max_counts = {'i': 0, 'r': 0, 't': 0, 's': 0, 'o': 0, 'u': 0, 'd': 0, 'g': 0,
+                                'a': 2, 'n': 2, 'e': 2}
 
-    # scores = word_filter.get_guess_scores()
-    # print(word_filter.words)
-    min_count, max_count = word_filter.create_count_contraint('stood', 'GGG__')
-    print(max_count, min_count)
+    word_filter.words = {'apple', 'brick', 'pulse', 'ankle', 'annex'}
+
+    word_filter.pos_answers, allowed_guesses = word_filter.filter()
+    print(allowed_guesses)
+
