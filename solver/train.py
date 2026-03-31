@@ -274,7 +274,7 @@ def run_gather_data(word_list):
     d_utils.find_first_guess(word_list, word_to_index, guess_matrix)
     d_utils.apply_sigmoid()
 
-def run_solver(word_list, first_guess, test: bool = False, train_iter: int = 10):
+def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10):
     ''' 
     Runs simulation of every possible wordle game
     
@@ -291,15 +291,15 @@ def run_solver(word_list, first_guess, test: bool = False, train_iter: int = 10)
         sys.exit()
     
     if not test:
-        best_score = 100
+        best_score = 4
         best_weights = (0,0,0)
         best_distribution = []
-        for i in range(5):
-            w1 = random.uniform(0.6, 0.8)
-            w2 = random.uniform(0.1, 0.4)
-            w3 = random.uniform(0.05, 0.15)
+        for i in range(train_iter):
+            w1 = random.uniform(0.65, 0.75) # Entropy weight (more value when selecting word) 
+            w2 = random.uniform(0.1, 0.25) # Worst case weight (slight bias to word removal)
+            w3 = random.uniform(0.1, 0.15) # word probability (little bias as only important when few words remain)
 
-            print(f'\nIteration {i}/10 starting:')
+            print(f'\nIteration {i}/{train_iter}starting:')
             print(f'Entropy Weight: {w1}, Worst Case Weight: {w2}, Probability Weight: {w3}')
             solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights=(w1, w2, w3))
             avg_guess, guess_distribution = solver.simulate_games(first_guess)
@@ -312,10 +312,10 @@ def run_solver(word_list, first_guess, test: bool = False, train_iter: int = 10)
         print('\n==================================')
         print(f'Best Score: {best_score}')
         print(f'Guess Distribution: {best_distribution}')
-        print(f'Weights: {(w1, w2, w3)}')
+        print(f'Weights: {best_weights}')
 
     else:
-        weights = (0.7008202360802951, 0.14992001943524405, 0.1379064222445996)
+        weights = (0.7254558452927472, 0.1329681643013621, 0.12866232366981367) # 3.3.56994369857081 0
         solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights)
         avg_guess, guess_distribution = solver.simulate_games(first_guess)
 
