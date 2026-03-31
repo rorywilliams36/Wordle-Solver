@@ -104,6 +104,12 @@ class WordleSolver:
                 
                 # finds possible guesses based on the result
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
+                curr_max_counts, curr_min_counts = filters.create_count_contraint(guess, res)
+                filters.max_counts, filters.min_counts = filters.update_count_contraints(curr_min_counts, curr_max_counts)
+
+                # print(f'Current {curr_max_counts, curr_min_counts}')
+                # print(f'All: {filters.max_counts, filters.min_counts}')
+
                 pos_answers, allowed_guesses = filters.filter()
                 pos_answers = pos_answers - completed_guesses
                 allowed_guesses = set(allowed_guesses) - completed_guesses
@@ -174,7 +180,6 @@ class WordleSolver:
             # finds the worst case of words left
             # same pattern/results will result in the same size answer list
             worst_case = max(pattern_counts.values())
-
 
             # Get word probability
             # if guess is not a possible answer

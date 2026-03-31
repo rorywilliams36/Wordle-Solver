@@ -1,4 +1,5 @@
-import numpy as np 
+from collections import Counter
+import numpy as np
 
 """ 
 Wordle Filter
@@ -23,7 +24,7 @@ class WordleFilter:
 
     Attributes:
         words: array of words that are possible guesses
-        guesses: Set of words that are possible answers
+        pos_answers: Set of words that are possible answers
         green: Set containing position of green letters [(letter, pos)]
         yellow: Set containing position of yellow letters [(letter, pos)]
         grey: Set containing letters not included in the target/answer word
@@ -31,10 +32,12 @@ class WordleFilter:
 
     def __init__(self, words: set = WORD_LIST):
         self.words = words
-        self.guesses = set()
+        self.pos_answers = set()
         self.green = set() 
         self.yellow = set()
         self.grey = set()
+        self.min_counts = {}
+        self.max_counts = {}
 
     def filter(self):
         """ 
@@ -45,7 +48,7 @@ class WordleFilter:
             words = set of all available words that can be guessed not containing grey letters
         """
 
-        self.guesses = set()
+        self.pos_answers = set()
 
         self.words = self.remove_greys()
         
@@ -54,25 +57,18 @@ class WordleFilter:
 
         for word in self.words:
             set_word = set(word)
-
             valid = True
 
             # Check Green
-            green_count = 0
             for l, pos in self.green:
                 if word[pos] != l:
                     valid = False
                     break
-                green_count += 1
-
-            if green_count != green_check:
-                valid = False
 
             if not valid:
                 continue
 
             # Check Yellows
-            yellow_count = 0
             for l, pos in self.yellow:
                 if l not in set_word:
                     valid = False
@@ -80,23 +76,84 @@ class WordleFilter:
                 if word[pos] == l:
                     valid = False
                     break
-                yellow_count += 1
-
-            if yellow_check != yellow_count:
-                valid = False
             
             if not valid: 
                 continue
+            
+            # FIlter based on letter counts
+            valid = self.filter_word_counts(word)
 
             # Add word if allowed
             if valid:
-                self.guesses.add(word)
-
-        return self.guesses, self.words
+                self.pos_answers.add(word)
+        return self.pos_answers, self.words
 
     def remove_greys(self):
         ''' Returns list of words that dont contain grey letters '''
         return [w for w in self.words if not (set(w) & self.grey)]
+
+    def filter_word_counts(self, word):
+        ''' Filters word based on letter counts '''
+        word_counts = Counter(word)
+        for l in self.min_counts:
+            if word_counts[l] < self.min_counts[l]:
+                return False
+        for l in self.max_counts:
+            if word_counts[l] > self.max_counts[l]:
+                return False
+        return True
+
+    def update_count_contraints(self, min_counts, max_counts):
+        ''' Updates the min/max counters after a guess has been submitted '''
+        for l in min_counts:
+            self.min_counts[l] = max(self.min_counts.get(l, 0), min_counts[l])
+
+        for l in max_counts:
+            self.max_counts[l] = min(self.max_counts.get(l, 5), max_counts[l])
+            # if min count of letter is bigger than max count
+            if l in self.min_counts:
+                if self.max_counts[l] < self.min_counts[l]:
+                    self.max_counts[l] = self.min_counts[l]
+
+        return self.max_counts, self.min_counts
+
+    def create_count_contraint(self, guessed_word, result):
+        ''' 
+        Creates counters showing the max/min occurences a letter can have in a word
+        Used to avoid cases where a word with a double letter is guessed and other words 
+        with double letters are not removed from the possible answer list
+        '''
+        guessed_word_counts = Counter(guessed_word)
+        min_counts = {}
+        max_counts = {}
+        word_len = len(guessed_word)
+
+        # Gets the minimum count for letters in the result using yellows and greens
+        for i, res in enumerate(result):
+            if res in ('G', 'Y'):
+                min_counts[guessed_word[i]] = min_counts.get(guessed_word[i], 0) + 1
+
+        # Get number of guessed letters correct
+        sum_min_counts = sum(min_counts.values())
+
+        # Get max occurences a letter can have
+        for letter in guessed_word_counts:
+            min_letter_count = min_counts.get(letter, 0)
+
+            # gets occurences of the letter being grey in the result
+            # if a letter is grey and green/yellow there cant be more occurences of the letter
+            grey_count = sum(1 for i, res in enumerate(result) if ((res == '_') and (guessed_word[i] == letter)))
+
+            # if letter is green/yellow and grey set max_count to min value
+            if grey_count > 0:
+                max_counts[letter] = min_letter_count
+            # Set upper bound
+            # can be at most 5 of same letter but unlikely
+            else:
+                max_counts[letter] = word_len-len(min_counts.values())
+
+        return max_counts, min_counts
+
 
     def allocate_letters(self, guessed_word, result):
         '''
@@ -128,6 +185,7 @@ class WordleFilter:
 
         return self.grey, self.yellow, self.green
 
+
 if __name__ == "__main__":
     word_filter = WordleFilter()
 
@@ -136,9 +194,9 @@ if __name__ == "__main__":
     word_filter.yellow = {('a', 2), ('t', 3), ('o', 2)}
     word_filter.green = {}
 
-    word_filter.guesses. allowed_guesses = word_filter.filter()
+    # word_filter.pos_answers, allowed_guesses = word_filter.filter()
 
     # scores = word_filter.get_guess_scores()
     # print(word_filter.words)
-    print(word_filter.guesses)
-
+    min_count, max_count = word_filter.create_count_contraint('stood', 'GGG__')
+    print(max_count, min_count)
