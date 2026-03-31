@@ -2,7 +2,6 @@ import argparse
 import numpy as np
 
 from wordle_game import run_game
-import wordle_game
 from solver.train import run_gather_data, run_solver
 
 """
