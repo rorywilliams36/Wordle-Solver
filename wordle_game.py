@@ -26,7 +26,7 @@ class WordleGame:
         answer: word set as answer in the game (str)
         word_list: list of words that are available to be guessed and set as answers
         guessed_letters: dict containing which letters have been catergorised after each guess (grey, yellow, green)
-        output: result from the current guess
+        result: result from the current guess
         solved: bool indicating if the answer has bee guessed
         num_guesses: int indicating the current guess number
     '''
@@ -35,7 +35,7 @@ class WordleGame:
         self.answer = answer
         self.word_list = word_list
         self.guessed_letters = {'Grey' : set(), 'Yellow' : set(), 'Green' : set()}
-        self.output = []
+        self.result = []
         self.solved = False
         self.num_guesses = 0
 
@@ -52,30 +52,30 @@ class WordleGame:
             guess: word that has been guessed (str)
         
         Returns:
-            output: string of indicating what letters are correct from the guess
+            result: string of indicating what letters are correct from the guess
 
         '''
         
         # Gets result from guess compared to answer
-        self.output = self.pattern(guess, self.answer)
+        self.result = self.pattern(guess, self.answer)
 
         # Update Guessed Letter Dict           
         # Meant to emulate the keyboard display
         # If a letter is green and yellow in the current guess green takes prioity
         # Letter cannot be grey and another colour
         for i in range(WORD_LEN):
-            if self.output[i] == 'G':
+            if self.result[i] == 'G':
                 self.guessed_letters['Green'].add(guess[i].upper())            
-            if self.output[i] == 'Y':
+            if self.result[i] == 'Y':
                 self.guessed_letters['Yellow'].add(guess[i].upper())            
-            if self.output[i] == '_':
+            if self.result[i] == '_':
                 self.guessed_letters['Grey'].add(guess[i].upper())
 
         self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
         # Sets yellow letter to green if found
         self.guessed_letters['Yellow'] = self.guessed_letters['Yellow'] - self.guessed_letters['Green']
 
-        return self.output
+        return self.result
 
     def pattern(self, guess, answer):
         '''
@@ -88,30 +88,30 @@ class WordleGame:
             guess: string of user's guessed/inputted word
 
         Return:
-            output: result comparing the answer and the guess
+            result: result comparing the answer and the guess
         '''
-        self.output = ["."] * WORD_LEN
+        self.result = ["."] * WORD_LEN
         answer_letters = list(answer)
 
         # Check for greens
         for i in range(WORD_LEN):
             if guess[i] == answer[i]:
-                self.output[i] = "G"
+                self.result[i] = "G"
                 # Set letter as seen
                 answer_letters[i] = None
 
         # Check for greys and yellows
         for i in range(WORD_LEN):
-            if self.output[i] == ".":
+            if self.result[i] == ".":
                 if guess[i] in answer_letters:
-                    self.output[i] = "Y"
+                    self.result[i] = "Y"
                     # set letter as seen
                     answer_letters[answer_letters.index(guess[i])] = None
                 # Set grey
                 else:
-                    self.output[i] = "_"
+                    self.result[i] = "_"
 
-        return self.output
+        return self.result
 
     def check(self, guess):
         ''' Win condition '''
@@ -182,7 +182,7 @@ def run_game(word_list, answer):
 
         # Compares guess to answer
         wordle.game(guess)
-        print(f'\nRESULT: {" ".join(wordle.output)}')
+        print(f'\nRESULT: {" ".join(wordle.result)}')
 
         print_guessed_letters(wordle.guessed_letters)
 
