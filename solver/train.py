@@ -157,7 +157,7 @@ class WordleSolver:
         Returns:
             pos_guess_scores: dict containing entropy values for the possible guesses
         '''
-        pos_guess_entropy = {}
+        pos_guess_scores = {}
         pos_guess_stats = {}
         pos_answers_len = len(pos_answers)
         worst_word_prob = self.word_probs['pupal'] * 0.1
@@ -195,7 +195,7 @@ class WordleSolver:
             words_left_ratio = 1- (worst_case / pos_answers_len)
             score = expected_score(H, word_prob, max_entropy, words_left_ratio)
             # print(guess, H, score, max_entropy, word_prob)
-            pos_guess_entropy[guess] = score
+            pos_guess_scores[guess] = score
             pos_guess_stats[guess] = [worst_case, words_left_ratio, H, H/max_entropy, score]
 
         sorted_guess_stats = sorted(pos_guess_stats.items(), key=lambda item: item[1][4], reverse=True)
@@ -205,7 +205,7 @@ class WordleSolver:
         #         print(sorted_guess_stats[i])
         # print('============')
 
-        return pos_guess_entropy
+        return pos_guess_scores
 
 
 def entropy(pattern_counts):
@@ -276,6 +276,11 @@ def run_solver(word_list, first_guess):
         
     solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list)
     solver.solve(first_guess)
+
+
+
+
+
 
 def progress_bar(current, total, bar_length=30):
     '''Progress bar'''
