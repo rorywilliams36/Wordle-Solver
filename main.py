@@ -33,7 +33,7 @@ def validate_answer(word_list, input_word):
     if input_word is not None:
         if input_word in word_list:
             return input_word
-        print(f'{input_word}: is not valid to use. Then answer will be randomised from the word list')
+        print(f'{input_word}: is not valid to use. The answer will be randomised from the word list')
     return None
 
 
@@ -43,12 +43,12 @@ if __name__ == "__main__":
     # Run code
     parser.add_argument('-g', '--game', action='store_true', help="Run Wordle Game")
     parser.add_argument('-s', '--solver', action='store_true', help="Run Wordle Solver")
-    parser.add_argument('-gd', '--gather_data', action='store_true', help="Creates guess matrix and calculate entropies for first guesses (Must be ran before using solver)")
+    parser.add_argument('-gd', '--gather_data', action='store_true', help="Creates guess matrix, calculates first guess entropies and word probabilites (must be ran before using solver)")
     parser.add_argument('-gs', '--game_solver', action='store_true', help="Run Game and Solver")
 
     # Set Variables
-    parser.add_argument('-sa', '--set_answer', type=str, help="Set Wordle Answer (Only used when p the game)", default=None)
-    parser.add_argument('-wl', '--set_wordlist', type=str, choices=['answers', 'guesses', 'most_common'], help="Set wordlist", default='most_common')
+    parser.add_argument('-sa', '--set_answer', type=str, help="Set Wordle Answer (Only used when playing the game)", default=None)
+    parser.add_argument('-wl', '--set_wordlist', type=str, choices=['answers', 'guesses', 'most_common'], help="Set wordlist using either (all previous answer in Wordle, all allowed guesses in Wordle, most common 5 letter words)", default='most_common')
     parser.add_argument('-fg', '--set_first_guess', type=str, help='Sets first guess used in solver', default=None)
     
     # Get Args
