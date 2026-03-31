@@ -55,6 +55,7 @@ class WordleSolver:
 
         N = len(self.word_list)
         first_guess = None
+
         # Set first guess if none is defined
         first_entropy = 0
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
@@ -78,7 +79,7 @@ class WordleSolver:
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
-            # as answer but in differnet order
+            # as answer but in different order
             completed_guesses = set()
             guess_record[answer] = []
 
@@ -88,9 +89,7 @@ class WordleSolver:
                 max_entropy = -np.log2(1/pos_answers_remain)      
 
                 # gets result for chosen guess
-                g_idx = self.word_to_index[guess]
-                a_idx = self.word_to_index[answer]
-                res = self.guess_matrix[g_idx][a_idx]
+                res = self.get_result(guess, answer)
 
                 # add guess to record
                 # print(guess_num, guess, res, entropy, pos_answers_remain)
@@ -102,17 +101,15 @@ class WordleSolver:
                     solved = True
                     break
                 
-                # finds possible guesses based on the result
+                # filters to find possible answers and guess list based on the result
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
                 curr_max_counts, curr_min_counts = filters.create_count_contraint(guess, res)
                 filters.max_counts, filters.min_counts = filters.update_count_contraints(curr_min_counts, curr_max_counts)
-
-                # print(f'Current {curr_max_counts, curr_min_counts}')
-                # print(f'All: {filters.max_counts, filters.min_counts}')
-
                 pos_answers, allowed_guesses = filters.filter()
+
+                # remove already submitted guesses from wordlist
                 pos_answers = pos_answers - completed_guesses
-                allowed_guesses = set(allowed_guesses) - completed_guesses
+                allowed_guesses = allowed_guesses - completed_guesses
 
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
@@ -141,10 +138,13 @@ class WordleSolver:
 
 
             progress_bar(i, N)
+        unsolved = sum(guess_distribution[6:])
 
-        # print(num_guesses)
-        print(guess_distribution)
-        print(np.mean(num_guesses))
+        print('\n==================================')
+        print(f'Guess Distribution: {guess_distribution}')
+        print(f'Mean Guesses to solve: {np.mean(num_guesses)}')
+        print(f'Words found in 6< guesses: {unsolved}')
+        print(f'Words unsolved/not found: {guess_distribution[-1]}')
 
     def get_possible_guess_scores(self, pos_answers, allowed_guesses, max_entropy):
         ''' 
@@ -167,9 +167,7 @@ class WordleSolver:
 
             for answer in pos_answers:
                 # Lookup result for guess and answer
-                g_idx = self.word_to_index[guess]
-                a_idx = self.word_to_index[answer]
-                res = self.guess_matrix[g_idx][a_idx]
+                res = self.get_result(guess, answer)
 
                 # Increment result occurence
                 pattern_counts[res] = pattern_counts.get(res, 0) + 1
@@ -207,6 +205,12 @@ class WordleSolver:
 
         return pos_guess_scores
 
+    def get_result(self, guess, answer):
+        ''' Lookup result from guess matrix given the guess and answer '''
+        g_idx = self.word_to_index[guess]
+        a_idx = self.word_to_index[answer]
+        res = self.guess_matrix[g_idx][a_idx]
+        return res
 
 def entropy(pattern_counts):
     '''

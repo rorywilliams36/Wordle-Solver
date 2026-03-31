@@ -54,7 +54,7 @@ class WordleFilter:
 
         self.pos_answers = set()
 
-        self.words = self.remove_greys()
+        self.words = set(self.remove_greys())
         
         for word in self.words:
             set_word = set(word)

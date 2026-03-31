@@ -129,5 +129,5 @@ def test_filter():
 
     assert word_filter.pos_answers == {'ankle', 'annex'}
     assert len(word_filter.pos_answers) == 2
-    assert set(allowed_guesses) == {'ankle', 'apple', 'annex'}
+    assert allowed_guesses == {'ankle', 'apple', 'annex'}
 
