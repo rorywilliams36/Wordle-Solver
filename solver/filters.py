@@ -20,18 +20,18 @@ WORD_LEN = 5
 class WordleFilter:
     '''
     Wordle Filter Class
-    Contains relevant functions to filter the word lists given the grey, yellow and green letters
+    Contains relevant functions to filter the word lists given the grey, yellow and green letters and letter occurences
 
     Attributes:
-        words: array of words that are possible guesses
+        words: Set of words that are possible guesses
         pos_answers: Set of words that are possible answers
 
-        green: Set containing position of green letters [(letter, pos)]
-        yellow: Set containing position of yellow letters [(letter, pos)]
+        green: Set containing position of green letters {(letter, pos)}
+        yellow: Set containing position of yellow letters {(letter, pos)}
         grey: Set containing letters not included in the target/answer word
 
-        min_counts: dict containing the minimum occurences a letter can have in the answer
-        max_counts: dict containing the maximum occurences a letter can have in the answer
+        min_counts: Dict containing the minimum occurences a letter can have in the answer
+        max_counts: Dict containing the maximum occurences a letter can have in the answer
     '''
 
     def __init__(self, words: set = WORD_LIST):
@@ -54,6 +54,7 @@ class WordleFilter:
 
         self.pos_answers = set()
 
+        # Remove words with grey letters
         self.words = set(self.remove_greys())
         
         for word in self.words:
@@ -81,7 +82,7 @@ class WordleFilter:
             if not valid: 
                 continue
             
-            # FIlter based on letter counts
+            # Filter based on letter counts
             valid = self.filter_letter_counts(word)
 
             # Add word if allowed
@@ -95,7 +96,8 @@ class WordleFilter:
         return [w for w in self.words if not (set(w) & self.grey)]
 
     def filter_letter_counts(self, word):
-        ''' Filters word based on letter counts 
+        ''' 
+        Filters word based on letter counts 
         
         Args:
             word: str word from wordlist
@@ -113,7 +115,8 @@ class WordleFilter:
         return True
 
     def update_count_contraints(self, min_counts, max_counts):
-        ''' Updates the min/max counters after a guess has been submitted 
+        ''' 
+        Updates the min/max counters after a guess has been submitted 
 
         Args:
             min_counts: dict contain minimum occurences of the letter in the answer

@@ -26,7 +26,7 @@ class WordleGame:
         answer: word set as answer in the game (str)
         word_list: list of words that are available to be guessed and set as answers
         guessed_letters: dict containing which letters have been catergorised after each guess (grey, yellow, green)
-        result: result from the current guess
+        result: pattern from the current guess compared to the answer
         solved: bool indicating if the answer has bee guessed
         num_guesses: int indicating the current guess number
     '''
@@ -62,7 +62,6 @@ class WordleGame:
         # Update Guessed Letter Dict           
         # Meant to emulate the keyboard display
         # If a letter is green and yellow in the current guess green takes prioity
-        # Letter cannot be grey and another colour
         for i in range(WORD_LEN):
             if self.result[i] == 'G':
                 self.guessed_letters['Green'].add(guess[i].upper())            
@@ -71,7 +70,9 @@ class WordleGame:
             if self.result[i] == '_':
                 self.guessed_letters['Grey'].add(guess[i].upper())
 
+        # Letter cannot be grey and another colour
         self.guessed_letters['Grey'] = self.guessed_letters['Grey'] - self.guessed_letters['Green'] - self.guessed_letters['Yellow']
+
         # Sets yellow letter to green if found
         self.guessed_letters['Yellow'] = self.guessed_letters['Yellow'] - self.guessed_letters['Green']
 
@@ -153,7 +154,7 @@ def run_game(word_list, answer):
     '''
     Main function to run game
 
-    args:
+    Args:
         word_list: list of words defined in program args
         answer: word set as answer to the game in program args
     '''

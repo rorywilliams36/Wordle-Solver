@@ -9,18 +9,18 @@ from wordle_game import WordleGame
 """
 Data Utils
 
-This module contains functions in the writing and loading files in the /data folder
+This module contains functions in the writing and loading files in the /data folder and also
+any functions to be used before running the solver for the first time
 
 """
 
-
 PATH = f'{os.path.abspath(os.getcwd())}/data'
-
 
 def create_guess_matrix(word_list):
     '''
     Creates matrix where matrix[guess][answer] is the comparison of words using 
     wordle game logic
+
     Matrix saves time since the comparisons between guesses and answers never change
     '''
 
@@ -46,7 +46,16 @@ def create_guess_matrix(word_list):
         print(f"Error: {e}")
 
 def find_first_guess(word_list, word_to_index, guess_matrix):
-    ''' Calculates the expected information gained for every word as a first guess '''
+    '''
+    Calculates the expected information gained (entropy) for every word as a first guess 
+    
+    Args:
+        word_list: set of words
+        word_to_index: dict containing word index pairs to be used for lookups in guess matrix
+        guess_matrix: array containing all possible results for a given guess and answer combination
+    '''
+
+    # import entropy calc from other module
     from solver.train import entropy
 
     guess_entropy = {}
@@ -99,8 +108,6 @@ def apply_sigmoid():
         z = 1/(1 + np.exp(alpha*(x - beta)))
         word_prob[word] = z
 
-    print(word_prob)
-
     # Save values
     word_prob_path = f"{PATH}/word_probabilites.json"
     try:
@@ -114,6 +121,13 @@ def load_guess_matrix(word_list):
     '''
     Loads the guess matrix containing all results for each guess and answer
     Creates an indexing tool so that the guess matrix can be correctly accessed
+
+    Args:
+        word_list
+
+    Returns
+        word_to_index: dict containing the index of each word in the guess matrix
+        guess_matrix: array containing all possible results given the indices of the guess and answer
     '''
     # Load guess lookup matrix
     guess_matrix = []
@@ -128,7 +142,7 @@ def load_guess_matrix(word_list):
     return guess_matrix, word_to_index
 
 def load_json(f_name):
-    ''' Loads the JSON file given by f_name '''
+    ''' Loads the JSON file given by filename (f_name) '''
     json_file = {}
     try:
         with open(f"{PATH}/{f_name}.json", "r") as f:
