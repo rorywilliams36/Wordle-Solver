@@ -58,10 +58,10 @@ def test_filter_counters():
     word_filter.max_counts = {'r': 0, 'a': 0, 'i': 0, 's': 2, 't': 2, 'o': 2, 'c': 0, 'k': 0}
     word_filter.min_counts = {'s' : 1, 't' : 1, 'o' : 1}
 
-    min_not_valid = word_filter.filter_word_counts('stock') # doesn't contain c
-    max_not_valid = word_filter.filter_word_counts('slash') # contains to many s 's
-    single_valid = word_filter.filter_word_counts('stole') # test double letters
-    double_valid = word_filter.filter_word_counts('stood') #  test single letters
+    min_not_valid = word_filter.filter_letter_counts('stock') # doesn't contain c
+    max_not_valid = word_filter.filter_letter_counts('slash') # contains to many s 's
+    single_valid = word_filter.filter_letter_counts('stole') # test double letters
+    double_valid = word_filter.filter_letter_counts('stood') #  test single letters
 
     assert min_not_valid == False
     assert max_not_valid == False

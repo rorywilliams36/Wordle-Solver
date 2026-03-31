@@ -25,9 +25,13 @@ class WordleFilter:
     Attributes:
         words: array of words that are possible guesses
         pos_answers: Set of words that are possible answers
+
         green: Set containing position of green letters [(letter, pos)]
         yellow: Set containing position of yellow letters [(letter, pos)]
         grey: Set containing letters not included in the target/answer word
+
+        min_counts: dict containing the minimum occurences a letter can have in the answer
+        max_counts: dict containing the maximum occurences a letter can have in the answer
     '''
 
     def __init__(self, words: set = WORD_LIST):
@@ -44,7 +48,7 @@ class WordleFilter:
         Removes words from the array which contain the invalid letters
 
         Return:
-            guesses = set of words that can be possible answers
+            pos_answers = set of words that can be possible answers
             words = set of all available words that can be guessed not containing grey letters
         """
 
@@ -56,7 +60,7 @@ class WordleFilter:
             set_word = set(word)
             valid = True
 
-            # Check Green
+            # Check Greens
             for l, pos in self.green:
                 if word[pos] != l:
                     valid = False
@@ -78,19 +82,27 @@ class WordleFilter:
                 continue
             
             # FIlter based on letter counts
-            valid = self.filter_word_counts(word)
+            valid = self.filter_letter_counts(word)
 
             # Add word if allowed
             if valid:
                 self.pos_answers.add(word)
+
         return self.pos_answers, self.words
 
     def remove_greys(self):
         ''' Returns list of words that dont contain grey letters '''
         return [w for w in self.words if not (set(w) & self.grey)]
 
-    def filter_word_counts(self, word):
-        ''' Filters word based on letter counts '''
+    def filter_letter_counts(self, word):
+        ''' Filters word based on letter counts 
+        
+        Args:
+            word: str word from wordlist
+
+        Returns:
+            bool whether the word is valid/possible answer based on the letter counts
+            '''
         word_counts = Counter(word)
         for l in self.min_counts:
             if word_counts[l] < self.min_counts[l]:
@@ -101,7 +113,17 @@ class WordleFilter:
         return True
 
     def update_count_contraints(self, min_counts, max_counts):
-        ''' Updates the min/max counters after a guess has been submitted '''
+        ''' Updates the min/max counters after a guess has been submitted 
+
+        Args:
+            min_counts: dict contain minimum occurences of the letter in the answer
+            max_counts: dict contain maximum occurences of the letter in the answer
+        
+        Returns:
+            min_counts: updated min_count dict using the args
+            max_counts: updated max_count dict using the args
+        '''
+
         for l in min_counts:
             self.min_counts[l] = max(self.min_counts.get(l, 0), min_counts[l])
 
@@ -117,8 +139,17 @@ class WordleFilter:
     def create_count_contraint(self, guessed_word, result):
         ''' 
         Creates counters showing the max/min occurences a letter can have in a word
+
         Used to avoid cases where a word with a double letter is guessed and other words 
         with double letters are not removed from the possible answer list
+
+        Args:
+            guessed_word: str of current word guess
+            result: str pattern/result of the guessed_word and the answer
+        
+        Returns:
+            min_counts: dict contain minimum occurences of the letter in the answer
+            max_counts: dict contain maximum occurences of the letter in the answer
         '''
         guessed_word_counts = Counter(guessed_word)
         min_counts = {}
