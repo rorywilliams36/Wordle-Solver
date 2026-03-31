@@ -21,7 +21,7 @@ def create_guess_matrix(word_list):
     '''
     Creates matrix where matrix[guess][answer] is the comparison of words using 
     wordle game logic
-    Matrix is saved and saves time since the comparisons between guesses and answers never change
+    Matrix saves time since the comparisons between guesses and answers never change
     '''
 
     # Initalise matrix
@@ -81,15 +81,7 @@ def find_first_guess(word_list, word_to_index, guess_matrix):
 def apply_sigmoid():
     ''' Applies sigmoid function to wordlist to calculate a probability for word being the answer '''
 
-    # open wordlist
-    try:
-        with open(f"{PATH}/wordlists/words.txt", "r") as f:
-            most_likely = f.readlines()
-            f.close()
-    except FileNotFoundError:
-        print('File not found')
-    except Exception as e:
-        print(f'Error: {e}')
+    most_likely = load_wordlist()
 
 
     # Apply sigmoid function (z)
@@ -148,3 +140,15 @@ def load_json(f_name):
         print(f'Error: {e}')
     return json_file
 
+def load_wordlist():
+    ''' Loads word list '''
+    most_likely = []
+    try:
+        with open(f"{PATH}/wordlists/words.txt", "r") as f:
+            most_likely = f.readlines()
+            f.close()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error: {e}')
+    return most_likely
