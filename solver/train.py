@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import numpy as np
 
@@ -34,22 +35,23 @@ class WordleSolver:
         word_list: array of words available to be used as guesses and answers
     '''
     
-    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list):
+    def __init__(self, guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, 
+                    weights: tuple = (1,1,1)):
         self.guess_matrix = guess_matrix
         self.word_to_index = word_to_index
         self.first_guess_entropy = first_guess_entropy
         self.word_probs = word_probs
         self.word_list = word_list
+        self.weights = weights
 
-    
-    def solve(self, first_guess: str = None):
+    def simulate_games(self, first_guess: str = None):
         '''
         Plays every possible Wordle game using a set word as the first guess
 
         Args:
             first_guess: str word to be set as the inital guess
 
-        return:
+        Returns:
             avg number of guesses for the game
         '''
 
@@ -131,20 +133,22 @@ class WordleSolver:
                 solved = True
                 guess_distribution[-1] += 1
 
-            if guess_num > 6:
-                print(f'\n{answer}')
-                print(guess_record[answer])
-                print('========================')
+            # if guess_num > 6:
+            #     print(f'\n{answer}')
+            #     print(guess_record[answer])
+            #     print('========================')
 
 
             progress_bar(i, N)
         unsolved = sum(guess_distribution[6:])
+        avg_guess = np.mean(num_guesses)
 
         print('\n==================================')
         print(f'Guess Distribution: {guess_distribution}')
-        print(f'Mean Guesses to solve: {np.mean(num_guesses)}')
+        print(f'Mean Guesses to solve: {avg_guess}')
         print(f'Words found in 6< guesses: {unsolved}')
         print(f'Words unsolved/not found: {guess_distribution[-1]}')
+        return avg_guess, guess_distribution
 
     def get_possible_guess_scores(self, pos_answers, allowed_guesses, max_entropy):
         ''' 
@@ -160,7 +164,6 @@ class WordleSolver:
         pos_guess_scores = {}
         pos_guess_stats = {}
         pos_answers_len = len(pos_answers)
-        worst_word_prob = self.word_probs['pupal'] * 0.1
 
         for guess in allowed_guesses:
             pattern_counts = {}
@@ -174,35 +177,18 @@ class WordleSolver:
 
             # Calculate entropy for word
             H = entropy(pattern_counts)
-
-            # finds the worst case of words left
-            # same pattern/results will result in the same size answer list
-            worst_case = max(pattern_counts.values())
-
-            # Get word probability
-            # if guess is not a possible answer
-            if guess not in pos_answers:
-                word_prob = 0
-            # if guess is an uncommon word set probability to unlikely
-            elif not self.word_probs.get(guess):
-                word_prob = worst_word_prob
-            else:
-                word_prob = self.word_probs[guess]
+            word_prob = self.get_word_probabilities(pos_answers, guess)
+            worst_case_ratio = self.get_worst_case(pattern_counts)
 
             # get score
-            words_left_ratio = 1- (worst_case / pos_answers_len)
-            score = expected_score(H, word_prob, max_entropy, words_left_ratio)
+            score = self.expected_score(H, word_prob, max_entropy, worst_case_ratio)
+
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_scores[guess] = score
-            pos_guess_stats[guess] = [worst_case, words_left_ratio, H, H/max_entropy, score]
+            pos_guess_stats[guess] = [H, H/max_entropy, worst_case_ratio, word_prob, score]
 
         sorted_guess_stats = sorted(pos_guess_stats.items(), key=lambda item: item[1][4], reverse=True)
-        
-        # for i in range(10):
-        #     if i < len(sorted_guess_stats):
-        #         print(sorted_guess_stats[i])
-        # print('============')
-
+    
         return pos_guess_scores
 
     def get_result(self, guess, answer):
@@ -211,6 +197,44 @@ class WordleSolver:
         a_idx = self.word_to_index[answer]
         res = self.guess_matrix[g_idx][a_idx]
         return res
+
+# Score Calculations
+    def get_word_probabilities(self, pos_answers, guess):
+        worst_word_prob = self.word_probs['pupal'] * 0.1
+
+        # Get word probability
+        # if guess is not a possible answer
+        if guess not in pos_answers:
+            word_prob = 0
+        # if guess is an uncommon word set probability to unlikely
+        elif not self.word_probs.get(guess):
+            word_prob = worst_word_prob
+        else:
+            word_prob = self.word_probs[guess]
+        return word_prob
+
+    def get_worst_case(self, pattern_counts):
+        # finds the worst case of words left
+        # same pattern/results will result in the same size answer list
+        worst_case = max(pattern_counts.values())
+        worst_case_ratio = 1 - (worst_case / sum(pattern_counts.values()))
+        return worst_case_ratio
+
+    def expected_score(self, H, word_prob, max_entropy, worst_case_ratio):
+        ''' 
+        Calculates the expected score of a word
+        Combines the entropy ratio, word proability and worst case of possible answers left into a single metric
+
+        Args:
+            H: entropy value for that guess
+            word_prob: probability the guess is likely the answer (defined using sigmoid function)
+            max_entropy: the maximum value entropy can be for that guess (also known as uncertainty)
+            word_left: ratio between the worst case of possible answerx left after the guess and number of possible answers currently
+        '''
+        w1, w2, w3 = self.weights
+        entropy_ratio = H / max_entropy
+        return w1*entropy_ratio +  w2*word_prob + w3*worst_case_ratio
+
 
 def entropy(pattern_counts):
     '''
@@ -222,7 +246,7 @@ def entropy(pattern_counts):
         pattern_counts: dict containing counters for occurences of each result/pattern
 
     Returns:
-        Entropy value (int)
+        H: Entropy value (float)
     '''
     H = 0
     counts = pattern_counts.values()
@@ -234,19 +258,7 @@ def entropy(pattern_counts):
 
     return H
 
-def expected_score(H, word_prob, max_entropy, word_left):
-    ''' 
-    Calculates the expected score of a word
-    Combines the entropy ratio, word proability and worst case of possible answers left into a single metric
 
-    Args:
-        H: entropy value for that guess
-        word_prob: probability the guess is likely the answer (defined using sigmoid function)
-        max_entropy: the maximum value entropy can be for that guess (also known as uncertainty)
-        word_left: ratio between the worst case of possible answerx left after the guess and number of possible answers currently
-    '''
-    entropy_ratio = H / max_entropy
-    return entropy_ratio +  word_prob + word_left
 
 # Main Functions
 def run_gather_data(word_list):
@@ -262,13 +274,13 @@ def run_gather_data(word_list):
     d_utils.find_first_guess(word_list, word_to_index, guess_matrix)
     d_utils.apply_sigmoid()
 
-def run_solver(word_list, first_guess):
+def run_solver(word_list, first_guess, test: bool = False, train_iter: int = 10):
     ''' 
     Runs simulation of every possible wordle game
     
     Args:
-        word_list: list/set of words defined in program args
-        first_guess: word set to be the first guess in all games defined in program args 
+        word_list: list/set of words defined in main program args
+        first_guess: word set to be the first guess in all games defined in main program args 
     '''
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
     first_guess_entropy = d_utils.load_json(GUESS_ENTROPYS)
@@ -277,15 +289,37 @@ def run_solver(word_list, first_guess):
     if (len(guess_matrix) == 0) or (len(first_guess_entropy) == 0) or (len(word_probs) == 0):
         print('Error loading data')
         sys.exit()
+    
+    if not test:
+        best_score = 100
+        best_weights = (0,0,0)
+        best_distribution = []
+        for i in range(5):
+            w1 = random.uniform(0.6, 0.8)
+            w2 = random.uniform(0.1, 0.4)
+            w3 = random.uniform(0.05, 0.15)
+
+            print(f'\nIteration {i}/10 starting:')
+            print(f'Entropy Weight: {w1}, Worst Case Weight: {w2}, Probability Weight: {w3}')
+            solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights=(w1, w2, w3))
+            avg_guess, guess_distribution = solver.simulate_games(first_guess)
+            if avg_guess < best_score:
+                best_score = avg_guess
+                best_distribution = guess_distribution
+                best_weights = (w1, w2, w3)
+                print(f'New best: {best_score}, {best_weights}')
         
-    solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list)
-    solver.solve(first_guess)
+        print('\n==================================')
+        print(f'Best Score: {best_score}')
+        print(f'Guess Distribution: {best_distribution}')
+        print(f'Weights: {(w1, w2, w3)}')
 
+    else:
+        weights = (0.7008202360802951, 0.14992001943524405, 0.1379064222445996)
+        solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights)
+        avg_guess, guess_distribution = solver.simulate_games(first_guess)
 
-
-
-
-
+# misc
 def progress_bar(current, total, bar_length=30):
     '''Progress bar'''
     percent = current / total
