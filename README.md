@@ -9,7 +9,8 @@ Inspired by Grant Sanderson (3Blue1Brown) youtube videos which uses Information 
 
 Words are scored then ranked by using these metrics in a weighted sum calculation where the weights are largely biased to the entropy value and least biased towards the word probability
 
-Solver averages ~3.5 guesses to find the answer
+Solver averages ~3.5 guesses to find the answer  
+Currently there maybe a few cases where the word is guessed >6 guesses
 
 ---
 
