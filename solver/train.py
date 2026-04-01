@@ -274,8 +274,8 @@ def run_gather_data(word_list):
     solver = WordleSolver(None, {}, {}, {}, word_list)
     d_utils.create_guess_matrix(word_list)
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
-    # d_utils.find_first_guess(word_list, word_to_index, guess_matrix)
-    # d_utils.apply_sigmoid()
+    d_utils.find_first_guess(word_list, word_to_index, guess_matrix)
+    d_utils.apply_sigmoid()
 
 def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10):
     ''' 
