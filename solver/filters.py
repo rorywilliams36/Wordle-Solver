@@ -108,9 +108,11 @@ class WordleFilter:
         word_counts = Counter(word)
         for l in self.min_counts:
             if word_counts[l] < self.min_counts[l]:
+                # print(f'Min {word, l, word_counts[l], self.max_counts[l]}')
                 return False
         for l in self.max_counts:
             if word_counts[l] > self.max_counts[l]:
+                # print(f'Max {word, l, word_counts[l], self.max_counts[l]}')
                 return False
         return True
 
@@ -181,7 +183,7 @@ class WordleFilter:
             # Set upper bound
             # can be at most 5 of same letter but unlikely
             else:
-                max_counts[letter] = word_len-len(min_counts.values())
+                max_counts[letter] = (word_len-len(min_counts.values())) + 1
 
         return max_counts, min_counts
 
