@@ -24,6 +24,8 @@ def create_guess_matrix(word_list):
     Matrix saves time since the comparisons between guesses and answers never change
     '''
 
+    print('Building Guess Matrix')
+    
     # Initalise matrix
     word_list_len = len(word_list)
     guess_matrix = np.empty((word_list_len, word_list_len), dtype=np.dtype('U100'))
@@ -43,7 +45,7 @@ def create_guess_matrix(word_list):
             np.save(f, guess_matrix)
             f.close()
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error creating guess matrix: \n{e}")
 
 def find_first_guess(word_list, word_to_index, guess_matrix):
     '''
@@ -59,6 +61,8 @@ def find_first_guess(word_list, word_to_index, guess_matrix):
     from solver.train import entropy
 
     guess_entropy = {}
+    
+    print('Calculating Entropies')
 
     for guess in word_list:
         pattern_counts = {}
@@ -85,10 +89,12 @@ def find_first_guess(word_list, word_to_index, guess_matrix):
         with open(entropy_file_path, 'w') as f:
             json.dump(guess_entropy, f)
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error saving entropy file: \n{e}')
 
 def apply_sigmoid():
     ''' Applies sigmoid function to wordlist to calculate a probability for word being the answer '''
+
+    print('Calculating Word Probabilites')
 
     most_likely = load_wordlist()
 
@@ -114,7 +120,7 @@ def apply_sigmoid():
         with open(word_prob_path, 'w') as f:
             json.dump(word_prob, f)
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error saving word probabilities: \n{e}')
 
 # Load Data
 def load_guess_matrix(word_list):
@@ -138,7 +144,7 @@ def load_guess_matrix(word_list):
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error loading guess matrix: \n{e}')
     return guess_matrix, word_to_index
 
 def load_json(f_name):
@@ -151,7 +157,7 @@ def load_json(f_name):
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error loading JSON file: \n{e}')
     return json_file
 
 def load_wordlist():
@@ -164,5 +170,5 @@ def load_wordlist():
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error loading word list: \n{e}')
     return most_likely
