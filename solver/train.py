@@ -203,6 +203,17 @@ class WordleSolver:
 
 # Score Calculations
     def get_word_probabilities(self, pos_answers, guess):
+        '''
+        Gets probability value for the relevant word from preset values
+
+        Args:
+            pos_answers: set of all possible answers
+            guess: word currently used as guess
+
+        Return:
+            word_prob: float of the probability the word is likely answer
+        '''
+        
         worst_word_prob = self.word_probs['pupal'] * 0.1
 
         # Get word probability
@@ -217,8 +228,15 @@ class WordleSolver:
         return word_prob
 
     def get_worst_case(self, pattern_counts):
-        # finds the worst case of words left
-        # same pattern/results will result in the same size answer list
+        '''
+        Calculates the worst case ratio 
+    
+        Args:
+            pattern_count: dict containing all possible results and their occurences
+
+        Returns
+            worst_case_ratio (float): Worst case of answers left to total number of possible answers
+        '''
         worst_case = max(pattern_counts.values())
         worst_case_ratio = 1 - (worst_case / sum(pattern_counts.values()))
         return worst_case_ratio
