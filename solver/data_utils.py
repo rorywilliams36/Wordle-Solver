@@ -147,6 +147,20 @@ def load_guess_matrix(word_list):
         print(f'Error loading guess matrix: \n{e}')
     return guess_matrix, word_to_index
 
+
+def save_json(f_name, data):
+    ''' Loads the JSON file given by filename (f_name) '''
+    json_file = {}
+    try:
+        with open(f"{PATH}/{f_name}.json", "w") as f:
+            json_file = json.dump(data, f)
+            f.close()
+    except FileNotFoundError:
+        print('File not found')
+    except Exception as e:
+        print(f'Error writing JSON file: \n{e}')
+
+
 def load_json(f_name):
     ''' Loads the JSON file given by filename (f_name) '''
     json_file = {}

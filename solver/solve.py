@@ -7,7 +7,7 @@ from solver.filters import WordleFilter
 import solver.data_utils as d_utils
 
 """
-train
+solve
 
 This module contains code used to solve and give recommnedation guesses for Wordle
 
@@ -66,11 +66,11 @@ class WordleSolver:
 
         num_guesses = []
         guess_record = {}
+        total_guess_stats = {}
         guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
 
         if random_samples > 0:
             words = random.sample(self.word_list, random_samples)
-
         else:
             words = list(self.word_list)
 
@@ -82,14 +82,15 @@ class WordleSolver:
             pos_answers_remain = N
             guess_num = 0
             solved = False
-            # print('================')
-            # print(f'{i} Answer: {answer}')
+            print('================')
+            print(f'{i} Answer: {answer}')
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
             # as answer but in different order
             completed_guesses = set()
             guess_record[answer] = []
+            total_guess_stats[answer] = []
 
             while (not solved):
                 guess_num += 1
@@ -101,7 +102,7 @@ class WordleSolver:
 
                 # add guess to record
                 # print(f'{guess_num, guess, res, entropy, pos_answers_remain}') # pos_answers_remain = num possible answers before guess is made
-                guess_record[answer].append((guess_num, guess, res, entropy, pos_answers_remain))
+                guess_record[answer].append({'Num': guess_num, 'Guess': guess, 'Result': res})
 
                 # Set guess as submitted 
                 completed_guesses.add(guess)
@@ -109,10 +110,15 @@ class WordleSolver:
                     solved = True
                     break
                 
-                # filters to find possible answers and guess list based on the result
+                # Filtering
+                # Update and get all grey, yellow and green letter sets from result 
                 filters.grey, filters.yellow, filters.green = filters.allocate_letters(guess, res)
+
+                # get and update letter counts from result
                 curr_max_counts, curr_min_counts = filters.create_count_contraint(guess, res)
                 filters.max_counts, filters.min_counts = filters.update_count_contraints(curr_min_counts, curr_max_counts)
+
+                #  New filtered wordlists
                 pos_answers, allowed_guesses = filters.filter()
 
                 # remove already submitted guesses from wordlist
@@ -122,10 +128,12 @@ class WordleSolver:
                 # checks if there are any guesses to be made
                 # Gets the word to be guesses next
                 if len(pos_answers) > 0:
-                    pos_guess_scores = self.get_possible_guess_scores(pos_answers, allowed_guesses, max_entropy)
+                    pos_guess_scores, guess_stats = self.get_possible_guess_scores(pos_answers, allowed_guesses, max_entropy)
                     guess = max(pos_guess_scores, key = pos_guess_scores.get)
                     entropy = pos_guess_scores[guess]
                     pos_answers_remain = len(pos_answers)
+                    total_guess_stats[answer].append(guess_stats)
+
                     
                 # if no guesses available set to unsolved
                 else:
@@ -146,7 +154,7 @@ class WordleSolver:
             #     print('========================')
 
 
-            progress_bar(i, N)
+            progress_bar(i, len(words))
         unsolved = sum(guess_distribution[6:])
         avg_guess = np.mean(num_guesses)
 
@@ -155,7 +163,7 @@ class WordleSolver:
         print(f'Mean Guesses to solve: {avg_guess}')
         print(f'Words found in 6< guesses: {unsolved}')
         print(f'Words unsolved/not found: {guess_distribution[-1]}')
-        return avg_guess, guess_distribution
+        return avg_guess, guess_distribution, guess_record, total_guess_stats
 
     def get_possible_guess_scores(self, pos_answers, allowed_guesses, max_entropy):
         ''' 
@@ -164,12 +172,13 @@ class WordleSolver:
         Args:
             pos_answers: set of words that are possible answers
             allowed_guesses: set of words that dont contain grey letters (contains words not possible to be answers)
+            max_entropy: float for the maximum value the entropy for a word can be
 
         Returns:
             pos_guess_scores: dict containing entropy values for the possible guesses
         '''
         pos_guess_scores = {}
-        pos_guess_stats = {}
+        pos_guess_stats = []
         pos_answers_len = len(pos_answers)
 
         for guess in allowed_guesses:
@@ -192,11 +201,18 @@ class WordleSolver:
 
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_scores[guess] = score
-            pos_guess_stats[guess] = [H, H/max_entropy, worst_case_ratio, word_prob, score]
+            pos_guess_stats.append({
+                'Guess': guess, 
+                'Entropy': H, 
+                'Entropy_Ratio': H/max_entropy, 
+                'Worst_Case_Ratio': worst_case_ratio, 
+                'Word_Prob': word_prob, 
+                'Score': score
+            })
 
-        sorted_guess_stats = sorted(pos_guess_stats.items(), key=lambda item: item[1][4], reverse=True)
+        sorted_guess_stats = sorted(pos_guess_stats, key=lambda x: x['Score'], reverse=True)
     
-        return pos_guess_scores
+        return pos_guess_scores, sorted_guess_stats
 
     def get_result(self, guess, answer):
         ''' Lookup result from guess matrix given the guess and answer '''
@@ -310,6 +326,8 @@ def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10, 
     Args:
         word_list: list/set of words defined in main program args
         first_guess: word set to be the first guess in all games defined in main program args 
+        train_iter: int to set the number of iterations to be used when training
+        random_samples: int of the number of random samples used for the solver
     '''
     # Load data
     guess_matrix, word_to_index = d_utils.load_guess_matrix(word_list)
@@ -336,7 +354,7 @@ def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10, 
             print(f'Entropy Weight: {w1}, Worst Case Weight: {w2}, Probability Weight: {w3}')
 
             solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights=(w1, w2, w3))
-            avg_guess, guess_distribution = solver.simulate_games(random_samples, first_guess)
+            avg_guess, guess_distribution, guess_record, guess_stats = solver.simulate_games(random_samples, first_guess)
 
             # Save weights if better average score
             if avg_guess < best_score:
@@ -355,7 +373,12 @@ def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10, 
     else:
         weights = (0.7254558452927472, 0.1029681643013621, 0.12866232366981367) # 3.3.56994369857081 0 3
         solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights)
-        avg_guess, guess_distribution = solver.simulate_games(random_samples, first_guess)
+        avg_guess, guess_distribution, guess_record, guess_stats = solver.simulate_games(random_samples, first_guess)
+        guess_record['Average_Guesses'] = avg_guess
+        guess_record['Distribution'] = guess_distribution
+
+        d_utils.save_json('guess_record', guess_record)
+        d_utils.save_json('guess_scores', guess_stats)
 
 # misc
 def progress_bar(current, total, bar_length=30):
