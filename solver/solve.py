@@ -205,6 +205,7 @@ class WordleSolver:
     def get_word_probabilities(self, pos_answers, guess):
         '''
         Gets probability value for the relevant word from preset values
+        Probability value is based on how common the word is
 
         Args:
             pos_answers: set of all possible answers
@@ -213,7 +214,7 @@ class WordleSolver:
         Return:
             word_prob: float of the probability the word is likely answer
         '''
-        
+
         worst_word_prob = self.word_probs['pupal'] * 0.1
 
         # Get word probability
@@ -251,6 +252,9 @@ class WordleSolver:
             word_prob: probability the guess is likely the answer (defined using sigmoid function)
             max_entropy: the maximum value entropy can be for that guess (also known as uncertainty)
             word_left: ratio between the worst case of possible answerx left after the guess and number of possible answers currently
+
+        Returns:
+            (float) word score using weighted sum
         '''
         w1, w2, w3 = self.weights
         entropy_ratio = H / max_entropy
@@ -276,7 +280,7 @@ def entropy(pattern_counts):
         p = count / total
         if p > 0:
             H -= p * np.log2(p)
-
+      
     return H
 
 

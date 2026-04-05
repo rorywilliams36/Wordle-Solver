@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 
 from wordle_game import run_game
-from solver.train import run_gather_data, run_solver
+from solver.solve import run_gather_data, run_solver
 
 """
 Main module to run the Wordle game or solver using the relevant arguments
@@ -51,7 +51,8 @@ if __name__ == "__main__":
     parser.add_argument('-wl', '--set_wordlist', type=str, choices=['answers', 'guesses', 'most_common'], help="Set wordlist using either (all previous answer in Wordle, all allowed guesses in Wordle, most common 5 letter words)", default='most_common')
     parser.add_argument('-fg', '--set_first_guess', type=str, help='Sets first guess used in solver', default=None)
     parser.add_argument('-ti', '--set_train_iterations', type=int, help='Sets the number of iterations used in training', default=10)
-    
+    parser.add_argument('-rs', '--random_samples',type=int , help='Sets the number random samples of words when using the solver (if not set use the entire wordlist)', default=0)
+
     # Get Args
     args = parser.parse_args()
 
@@ -66,9 +67,5 @@ if __name__ == "__main__":
         run_gather_data(word_list)
 
     if args.solver or args.train_solver:
-        if args.train_solver is None:
-            test = False
-        else:
-            test = True
-
+        test = False if args.train_solver is None else True
         run_solver(word_list, first_guess, test, args.set_train_iterations)
