@@ -68,4 +68,4 @@ if __name__ == "__main__":
 
     if args.solver or args.train_solver:
         test = False if args.train_solver is None else True
-        run_solver(word_list, first_guess, test, args.set_train_iterations)
+        run_solver(word_list, first_guess, test, args.set_train_iterations, args.random_samples)
