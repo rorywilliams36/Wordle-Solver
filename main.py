@@ -10,7 +10,7 @@ Main module to run the Wordle game or solver using the relevant arguments
 
 GUESS_LIST = sorted(set(np.loadtxt("data/wordlists/guess_wordlist.txt", dtype=str)))
 ANSWER_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str)))
-WORD_LIST = sorted(set(np.loadtxt("data/wordlists/words.txt", dtype=str)))
+WORD_LIST = sorted(set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)))
 
 def get_wordlist(word_list_arg):
     ''' Returns wordlist given its arg '''

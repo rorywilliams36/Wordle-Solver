@@ -13,7 +13,7 @@ Grey _ = Letter is not in the word
 """
 
 ANSWER = "" # Target word
-WORD_LIST = set(np.loadtxt("data/wordlists/words.txt", dtype=str)) # All words available in wordle
+WORD_LIST = set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)) # All words available in wordle
 WORDS_LIST_LEN = len(WORD_LIST)
 WORD_LEN = 5
 
