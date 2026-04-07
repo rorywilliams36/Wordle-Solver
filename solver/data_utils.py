@@ -140,13 +140,15 @@ def load_guess_matrix(word_list):
     word_to_index = {}
     try:
         guess_matrix = np.load(f"{PATH}/guess_matrix.npy", allow_pickle=True)
-        word_to_index = {w:i for i,w in enumerate(word_list)} # Indexing table for each word
+        word_to_index = load_word_to_index(word_list) # Indexing table for each word
     except FileNotFoundError:
         print('File not found')
     except Exception as e:
         print(f'Error loading guess matrix: \n{e}')
     return guess_matrix, word_to_index
 
+def load_word_to_index(word_list):
+    return {w:i for i,w in enumerate(word_list)}
 
 def save_json(f_name, data):
     ''' Loads the JSON file given by filename (f_name) '''
@@ -186,3 +188,24 @@ def load_wordlist():
     except Exception as e:
         print(f'Error loading word list: \n{e}')
     return most_likely
+
+
+def print_guess_scores(wordlist):
+    guess_scores = load_json('guess_scores')
+    word_to_index = load_word_to_index(wordlist)
+    words = guess_scores.keys()
+    guess_score_dict = {}
+    for w in words:
+        print('===========')
+        print(f'Answer: {w}')
+        game = guess_scores[w]
+        turns = len(game)
+        for t in range(turns):
+            print(f'\nNo. Guess: {t+1}')
+            guess = guess_scores[w][t]
+            guess_score_dict[w][t] = guess
+            for g in guess:
+                guessed_word_idx = g[0]
+                guessed_word = list(word_to_index.keys())[guessed_word_idx]
+                print(guessed_word, g[1:])
+    

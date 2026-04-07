@@ -58,6 +58,7 @@ class WordleSolver:
         N = len(self.word_list)
         first_guess = None
 
+
         # Set first guess if none is defined
         first_entropy = 0
         if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
@@ -68,6 +69,12 @@ class WordleSolver:
         guess_record = {}
         total_guess_stats = {}
         guess_distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # last idx is 10+/unsolved
+
+        # Get values for first guess to record
+        max_first_guess_entropy = -np.log2(1/N)
+        first_entropy_ratio = max_first_guess_entropy / first_entropy
+        first_word_prob = self.get_word_probabilities(self.word_list, first_guess)
+        first_score = self.expected_score(first_entropy, first_word_prob, max_first_guess_entropy, 0)
 
         if random_samples > 0:
             words = random.sample(self.word_list, random_samples)
@@ -91,6 +98,7 @@ class WordleSolver:
             completed_guesses = set()
             guess_record[answer] = []
             total_guess_stats[answer] = []
+            total_guess_stats[answer].append([(self.word_to_index[first_guess], first_entropy, first_entropy_ratio, 0, first_word_prob, first_score)])
 
             while (not solved):
                 guess_num += 1
@@ -102,7 +110,7 @@ class WordleSolver:
 
                 # add guess to record
                 # print(f'{guess_num, guess, res, entropy, pos_answers_remain}') # pos_answers_remain = num possible answers before guess is made
-                guess_record[answer].append({'Num': guess_num, 'Guess': guess, 'Result': res})
+                guess_record[answer].append(({'Num': guess_num, 'Guess': guess, 'Result': res}))
 
                 # Set guess as submitted 
                 completed_guesses.add(guess)
@@ -201,16 +209,9 @@ class WordleSolver:
 
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_scores[guess] = score
-            pos_guess_stats.append({
-                'Guess': guess, 
-                'Entropy': H, 
-                'Entropy_Ratio': H/max_entropy, 
-                'Worst_Case_Ratio': worst_case_ratio, 
-                'Word_Prob': word_prob, 
-                'Score': score
-            })
+            pos_guess_stats.append((self.word_to_index[guess], H, H/max_entropy, worst_case_ratio, word_prob, score))
 
-        sorted_guess_stats = sorted(pos_guess_stats, key=lambda x: x['Score'], reverse=True)
+        sorted_guess_stats = sorted(pos_guess_stats, key=lambda x: x[-1], reverse=True)[:10]
     
         return pos_guess_scores, sorted_guess_stats
 
