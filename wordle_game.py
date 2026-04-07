@@ -89,7 +89,7 @@ class WordleGame:
             guess: string of user's guessed/inputted word
 
         Return:
-            result: result comparing the answer and the guess
+            result: array pattern comparing the answer and the guess
         '''
         self.result = ["."] * WORD_LEN
         answer_letters = list(answer)
@@ -181,7 +181,7 @@ def run_game(word_list, answer):
         while not wordle.check_input(guess):
             guess = input("Enter a valid word: ")
 
-        # Compares guess to answer
+        # Run Game
         wordle.game(guess)
         print(f'\nRESULT: {" ".join(wordle.result)}')
 

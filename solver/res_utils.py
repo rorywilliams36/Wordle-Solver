@@ -5,7 +5,6 @@ import numpy as np
 
 from solver.data_utils import load_json, load_word_to_index
 
-
 GUESS_SCORE_FILE = 'guess_scores'
 GUESS_RECORD_FILE = 'guess_record' 
 
@@ -30,7 +29,9 @@ def load_guess_scores(word_list):
     return guess_score_dict
 
 
+# Print Functions
 def print_result_index(word_list, answer):
+    ''' Prints results form the guess record and scores given the answer word string'''
     guess_scores = load_guess_scores(word_list)
     guess_record = load_json(GUESS_RECORD_FILE)
 
@@ -59,14 +60,10 @@ def print_result_index(word_list, answer):
     else:
         print(f'\'{answer}\' is not found in the results')
 
-        
-
-
 
 def print_guess_scores(word_list):
     ''' Print guess_scores.json file'''
-    guess_scores = load_json(GUESS_SCORE_FILE)
-    word_to_index = load_word_to_index(word_list)
+    guess_scores = load_guess_scores(word_list)
     words = guess_scores.keys()
     print(f'Columns: Guess, Entropy, Entropy Ratio, Worst Case Ratio, Word Prob, Score')
 
@@ -76,12 +73,12 @@ def print_guess_scores(word_list):
         game = guess_scores[w]
         turns = len(game)
         for t in range(turns):
-            print(f'\nNo. Guess: {t+1}')
+            rank = 1
+            print(f'\nGuess {t+1}:')
             guess = guess_scores[w][t]
             for g in guess:
-                guessed_word_idx = g[0]
-                guessed_word = list(word_to_index.keys())[guessed_word_idx]
-                print(guessed_word, g[1:])
+                print(f'{rank}. {g}')
+                rank += 1
     
 
 def print_guess_record():
@@ -94,7 +91,7 @@ def print_guess_record():
         game = guess_record[w]
         turns = len(game)
         for turn in range(turns):
-            print(f'{turn+1}: Guess: {game[turn]['Guess']}, Result: {game[turn]['Result']}')
+            print(f'{turn+1}: {game[turn]['Guess']} {game[turn]['Result']}')
 
 
     guess_distribution = guess_record['Distribution']

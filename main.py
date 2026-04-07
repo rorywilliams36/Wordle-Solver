@@ -76,7 +76,6 @@ if __name__ == "__main__":
         run_solver(word_list, first_guess, test, args.set_train_iterations, args.random_samples)
 
     if args.results:
-        # r_utils.load_guess_scores(word_list)
-        # r_utils.print_guess_scores(word_list)
+        r_utils.print_guess_scores(word_list)
         # r_utils.print_guess_record()
-        r_utils.print_result_index(word_list, args.results_by_answer)
+        # r_utils.print_result_index(word_list, args.results_by_answer)
