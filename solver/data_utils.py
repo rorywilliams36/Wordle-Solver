@@ -188,24 +188,3 @@ def load_wordlist():
     except Exception as e:
         print(f'Error loading word list: \n{e}')
     return most_likely
-
-
-def print_guess_scores(wordlist):
-    guess_scores = load_json('guess_scores')
-    word_to_index = load_word_to_index(wordlist)
-    words = guess_scores.keys()
-    guess_score_dict = {}
-    for w in words:
-        print('===========')
-        print(f'Answer: {w}')
-        game = guess_scores[w]
-        turns = len(game)
-        for t in range(turns):
-            print(f'\nNo. Guess: {t+1}')
-            guess = guess_scores[w][t]
-            guess_score_dict[w][t] = guess
-            for g in guess:
-                guessed_word_idx = g[0]
-                guessed_word = list(word_to_index.keys())[guessed_word_idx]
-                print(guessed_word, g[1:])
-    

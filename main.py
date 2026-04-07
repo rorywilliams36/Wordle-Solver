@@ -3,7 +3,7 @@ import numpy as np
 
 from wordle_game import run_game
 from solver.solve import run_gather_data, run_solver
-from solver.data_utils import load_json, print_guess_scores
+from solver.res_utils import print_guess_record, print_guess_scores
 
 """
 Main module to run the Wordle game or solver using the relevant arguments
@@ -74,4 +74,5 @@ if __name__ == "__main__":
         run_solver(word_list, first_guess, test, args.set_train_iterations, args.random_samples)
 
     if args.results:
-        print_guess_scores(word_list)
+        # print_guess_scores(word_list)
+        print_guess_record()
