@@ -37,3 +37,13 @@ def print_guess_record():
         turns = len(game)
         for turn in range(turns):
             print(f'{turn+1}: Guess: {game[turn]['Guess']}, Result: {game[turn]['Result']}')
+
+
+    guess_distribution = guess_record['Distribution']
+    unsolved = sum(guess_distribution[6:])
+
+    print('\n==================================')
+    print(f'Guess Distribution: {guess_distribution}')
+    print(f'Average Guesses: {guess_record['Average_Guesses']}')
+    print(f'Words found in 6< guesses: {unsolved}')
+    print(f'Words unsolved/not found: {guess_distribution[-1]}')
