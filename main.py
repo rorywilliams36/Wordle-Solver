@@ -3,7 +3,7 @@ import numpy as np
 
 from wordle_game import run_game
 from solver.solve import run_gather_data, run_solver
-from solver.res_utils import print_guess_record, print_guess_scores
+import solver.res_utils as r_utils
 
 """
 Main module to run the Wordle game or solver using the relevant arguments
@@ -55,6 +55,8 @@ if __name__ == "__main__":
     parser.add_argument('-ti', '--set_train_iterations', type=int, help='Sets the number of iterations used in training', default=10)
     parser.add_argument('-rs', '--random_samples', type=int , help='Sets the number random samples of words when using the solver (if not set use the entire wordlist)', default=0)
 
+    parser.add_argument('--results_by_answer', type=str, help="Displays results for the given answer")
+
     # Get Args
     args = parser.parse_args()
 
@@ -74,5 +76,7 @@ if __name__ == "__main__":
         run_solver(word_list, first_guess, test, args.set_train_iterations, args.random_samples)
 
     if args.results:
-        # print_guess_scores(word_list)
-        print_guess_record()
+        # r_utils.load_guess_scores(word_list)
+        # r_utils.print_guess_scores(word_list)
+        # r_utils.print_guess_record()
+        r_utils.print_result_index(word_list, args.results_by_answer)
