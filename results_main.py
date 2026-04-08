@@ -17,18 +17,9 @@ GUESS_SCORES = r_utils.load_guess_scores(word_list)
 
 score_idx = ["_", "Entropy", "Entropy_Ratio", "Worst_Case_Ratio", "Word_Prob", "Score"]
 
-
-def on_button_click(canvas, button):
-    if button == 'Scores':
-        pass
-    if button == 'Record':
-        pass
-    if button == 'Distribution':
-        display_distribution()
-
 def display_score_plot(canvas, word_choice, turn_choice, score_choice):
 
-    word, turn, score = validate_choices(word_choice, turn_choice, score_choice)
+    word, turn, score = get_choices(word_choice, turn_choice, score_choice)
     game_scores = GUESS_SCORES[word]
 
     if turn > len(game_scores):
@@ -48,7 +39,7 @@ def display_score_plot(canvas, word_choice, turn_choice, score_choice):
     ax.bar(x_axis, y_axis)
 
     ax.set_title(f'Guess Scores for Answer: {word}, Guess Number: {turn+1}')
-    ax.set_xlabel(f'Top 10 potential Guesses')
+    ax.set_xlabel(f'Top 10 Potential Guesses')
     ax.set_ylabel(f'{score_idx[score]}')
     ax.tick_params(axis='x', rotation=45)
 
@@ -59,7 +50,39 @@ def display_score_plot(canvas, word_choice, turn_choice, score_choice):
                                 window=plot_canvas.get_tk_widget())
 
 def display_guess_record(canvas, word_choice):
-    pass
+    word = word_choice.get()
+    guesses = GUESS_RECORD[word]
+    num_guesses = len(guesses)
+
+    TILE_SIZE = 60
+    PADDING = 10
+
+    colors = {'_': "#787c7e", 'Y': "#c9b458", 'G': "#6aaa64" }
+
+    canvas.delete('all')
+    for row in range(len(guesses)):
+        for col in range(5):
+            guess = guesses[row]['Guess']
+            result = guesses[row]['Result']
+
+            letter = guess[col].upper()
+            letter_colour = result[col]
+
+            x1 = col * (TILE_SIZE + PADDING) + PADDING
+            y1 = row * (TILE_SIZE + PADDING) + PADDING
+            x2 = x1 + TILE_SIZE
+            y2 = y1 + TILE_SIZE
+
+            canvas.create_rectangle(x1, y1, x2, y2, fill=colors[letter_colour], outline="")
+
+            canvas.create_text(
+                (x1 + x2)//2,
+                (y1 + y2)//2,
+                text=letter,
+                fill="white" if letter else "black",
+                font=("Helvetica", 20, "bold")
+            )
+
 
 def display_distribution():
     distribution = GUESS_RECORD['Distribution']
@@ -82,7 +105,7 @@ def display_distribution():
     canvas.create_window(0, 0, anchor="nw",
                                 window=plot_canvas.get_tk_widget())
 
-def validate_choices(word_choice, turn_choice, score_choice):
+def get_choices(word_choice, turn_choice, score_choice):
     word = word_choice.get()
     turn = int(turn_choice.get())-1
     score = score_idx.index(score_choice.get())
@@ -126,7 +149,7 @@ if __name__ == '__main__':
 
     # displays guess record with thr guess, result and entropy + score for each guess
     # results in the middle with scores and entropies on the side
-    button2 = tk.Button(root, text="Display Guess Record", command=lambda: on_button_click(canvas, 'Record'))
+    button2 = tk.Button(root, text="Display Guess Record", command=lambda: display_guess_record(canvas, word_choice))
     button2.pack(pady=10)
 
     # bar chart
