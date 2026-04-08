@@ -19,7 +19,7 @@ score_idx = ["_", "Entropy", "Entropy_Ratio", "Worst_Case_Ratio", "Word_Prob", "
 colors = {'_': "#787c7e", 'Y': "#c9b458", 'G': "#6aaa64" }
 
 def display_score_plot(canvas, word_choice, turn_choice, score_choice):
-
+    ''' Displays bar chart showing relevant score metrics with the best possible guesses given the answer and turn number '''
     word, turn, score = get_choices(word_choice, turn_choice, score_choice)
     game_scores = GUESS_SCORES[word]
 
@@ -51,10 +51,12 @@ def display_score_plot(canvas, word_choice, turn_choice, score_choice):
                                 window=plot_canvas.get_tk_widget())
 
 def display_guess_record(canvas, word_choice):
+    ''' Diplays the solvers guesses with metrics for the wordle game given the answer '''
     word = word_choice.get()
     guesses = GUESS_RECORD[word]
     num_guesses = len(guesses)
 
+    # Get the scores for the guessed words in the guess record
     guesses_scores = [scores[0][-1] for scores in GUESS_SCORES[word]]
     guesses_entropies = [scores[0][1] for scores in GUESS_SCORES[word]]
 
@@ -65,9 +67,11 @@ def display_guess_record(canvas, word_choice):
     canvas.delete('all')
     for row in range(len(guesses)):
         for col in range(5):
+            # Get the guess and the result
             guess = guesses[row]['Guess']
             result = guesses[row]['Result']
 
+            # Get letter and its result
             letter = guess[col].upper()
             letter_colour = result[col]
 
@@ -76,6 +80,7 @@ def display_guess_record(canvas, word_choice):
             x2 = x1 + TILE_SIZE
             y2 = y1 + TILE_SIZE
 
+            # Wordle Grid
             canvas.create_rectangle(x1, y1, x2, y2, fill=colors[letter_colour], outline="")
 
             canvas.create_text(
@@ -86,6 +91,7 @@ def display_guess_record(canvas, word_choice):
                 font=("Helvetica", 20, "bold")
             )
 
+        # Score + Entropy columns
         score_x = 5 * (TILE_SIZE + PADDING) + 20
         if row < 6:
             canvas.create_text(
@@ -96,7 +102,6 @@ def display_guess_record(canvas, word_choice):
                 font=("Helvetica", 14)
             )
 
-        # --- Entropy column ---
         entropy_x = score_x + 70
         if row < 6:
             canvas.create_text(
@@ -127,6 +132,7 @@ def display_guess_record(canvas, word_choice):
 
 
 def display_distribution():
+    ''' Displays the guess distribution of the solver '''
     distribution = GUESS_RECORD['Distribution']
     canvas.delete('all')
 
@@ -148,6 +154,7 @@ def display_distribution():
                                 window=plot_canvas.get_tk_widget())
 
 def get_choices(word_choice, turn_choice, score_choice):
+    ''' Gets the choices from the dropdown '''
     word = word_choice.get()
     turn = int(turn_choice.get())-1
     score = score_idx.index(score_choice.get())

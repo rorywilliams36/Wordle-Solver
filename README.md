@@ -54,6 +54,12 @@ Testing will simulate all possible Wordle games using the selected word list and
 
 ---
 
+### Viewing the Results
+
+To view results run `py results_interface.py`  
+
+---  
+
 ## References
 [1] Sanderson, G. (2022). [Solving Wordle using information theory](https://www.youtube.com/watch?v=v68zYyaEmEA)
 
