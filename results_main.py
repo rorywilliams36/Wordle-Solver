@@ -16,13 +16,14 @@ GUESS_RECORD = d_utils.load_json('guess_record')
 GUESS_SCORES = r_utils.load_guess_scores(word_list)
 
 score_idx = ["_", "Entropy", "Entropy_Ratio", "Worst_Case_Ratio", "Word_Prob", "Score"]
+colors = {'_': "#787c7e", 'Y': "#c9b458", 'G': "#6aaa64" }
 
 def display_score_plot(canvas, word_choice, turn_choice, score_choice):
 
     word, turn, score = get_choices(word_choice, turn_choice, score_choice)
     game_scores = GUESS_SCORES[word]
 
-    if turn > len(game_scores):
+    if turn >= len(game_scores):
         turn = len(game_scores)-1
 
     turn_scores = game_scores[turn]
@@ -54,10 +55,12 @@ def display_guess_record(canvas, word_choice):
     guesses = GUESS_RECORD[word]
     num_guesses = len(guesses)
 
+    guesses_scores = [scores[0][-1] for scores in GUESS_SCORES[word]]
+    guesses_entropies = [scores[0][1] for scores in GUESS_SCORES[word]]
+
     TILE_SIZE = 60
     PADDING = 10
-
-    colors = {'_': "#787c7e", 'Y': "#c9b458", 'G': "#6aaa64" }
+    Y_OFFSET = 25
 
     canvas.delete('all')
     for row in range(len(guesses)):
@@ -69,7 +72,7 @@ def display_guess_record(canvas, word_choice):
             letter_colour = result[col]
 
             x1 = col * (TILE_SIZE + PADDING) + PADDING
-            y1 = row * (TILE_SIZE + PADDING) + PADDING
+            y1 = row * (TILE_SIZE + PADDING) + PADDING + Y_OFFSET
             x2 = x1 + TILE_SIZE
             y2 = y1 + TILE_SIZE
 
@@ -82,6 +85,45 @@ def display_guess_record(canvas, word_choice):
                 fill="white" if letter else "black",
                 font=("Helvetica", 20, "bold")
             )
+
+        score_x = 5 * (TILE_SIZE + PADDING) + 20
+        if row < 6:
+            canvas.create_text(
+                score_x,
+                (y1 + y2)//2,
+                text=f"{guesses_entropies[row]:.4f}",
+                anchor="w",
+                font=("Helvetica", 14)
+            )
+
+        # --- Entropy column ---
+        entropy_x = score_x + 70
+        if row < 6:
+            canvas.create_text(
+                entropy_x,
+                (y1 + y2)//2,
+                text=f"{guesses_scores[row]:.4f}",
+                anchor="w",
+                font=("Helvetica", 14)
+            )
+
+    header_y = PADDING // 2 + Y_OFFSET
+
+    canvas.create_text(
+        5 * (TILE_SIZE + PADDING) + 20,
+        header_y,
+        text="Entropy",
+        anchor="w",
+        font=("Helvetica", 12, "bold")
+    )
+
+    canvas.create_text(
+        5 * (TILE_SIZE + PADDING) + 100,
+        header_y,
+        text="Score",
+        anchor="w",
+        font=("Helvetica", 12, "bold")
+    )
 
 
 def display_distribution():
@@ -136,19 +178,18 @@ if __name__ == '__main__':
     turn_choice.current(0)
     turn_choice.pack(pady=10)
 
-    # Dropdown to pick values 
+    # Dropdown to pick score values 
     score_options = ["Entropy", "Entropy_Ratio", "Worst_Case_Ratio", "Word_Prob", "Score"]
     score_choice = ttk.Combobox(root, values=score_options)
     score_choice.current(0)
     score_choice.pack(pady=10)
 
     # Buttons
-    # Display score values for each answer given the turn and value (bar chart word on bottom; value on side)
+    # Display score values for each answer given the turn and value
     button1 = tk.Button(root, text="Display Guess Score Plot", command=lambda: display_score_plot(canvas, word_choice, turn_choice, score_choice))
     button1.pack(pady=10)
 
     # displays guess record with thr guess, result and entropy + score for each guess
-    # results in the middle with scores and entropies on the side
     button2 = tk.Button(root, text="Display Guess Record", command=lambda: display_guess_record(canvas, word_choice))
     button2.pack(pady=10)
 
