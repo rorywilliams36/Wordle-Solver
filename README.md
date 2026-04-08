@@ -50,6 +50,8 @@ To run Solver:
 
 Testing will simulate all possible Wordle games using the selected word list and output the average guesses to find the answer as well as the guess distribution showing the frequency of guesses for each game
 
+You can also use the `-rs` argument to set a number of random samples from the word list to be used in the solver  
+
 *Training is not neccessary as best weights are already in the program
 
 ---
