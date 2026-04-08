@@ -174,7 +174,7 @@ if __name__ == '__main__':
     button_frame.pack(side=tk.RIGHT, fill=tk.Y)
 
     # Pick Word from wordlist
-    word_options = list(GUESS_RECORD.keys())[:-2]
+    word_options = sorted(list(GUESS_RECORD.keys())[:-2])
     word_choice = ttk.Combobox(root, values=word_options)
     word_choice.current(0)
     word_choice.pack(pady=10)

@@ -89,8 +89,8 @@ class WordleSolver:
             pos_answers_remain = N
             guess_num = 0
             solved = False
-            print('================')
-            print(f'{i} Answer: {answer}')
+            # print('================')
+            # print(f'{i} Answer: {answer}')
 
             # Set containing all submitted guesses
             # avoids same guess being submitted if contains the same letters
