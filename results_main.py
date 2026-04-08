@@ -15,6 +15,8 @@ word_list = sorted(set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)))
 GUESS_RECORD = d_utils.load_json('guess_record')
 GUESS_SCORES = r_utils.load_guess_scores(word_list)
 
+score_idx = ["_", "Entropy", "Entropy_Ratio", "Worst_Case_Ratio", "Word_Prob", "Score"]
+
 
 def on_button_click(canvas, button):
     if button == 'Scores':
@@ -25,14 +27,42 @@ def on_button_click(canvas, button):
         display_distribution()
 
 def display_score_plot(canvas, word_choice, turn_choice, score_choice):
-    pass
+
+    word, turn, score = validate_choices(word_choice, turn_choice, score_choice)
+    game_scores = GUESS_SCORES[word]
+
+    if turn > len(game_scores):
+        turn = len(game_scores)-1
+
+    turn_scores = game_scores[turn]
+
+    x_axis = [i[0] for i in turn_scores]
+    y_axis = [i[score] for i in turn_scores]
+
+    canvas.delete('all')
+
+    # Create a Matplotlib figure
+    fig = Figure(figsize=(5, 5), dpi=100)
+    ax = fig.add_subplot(111)
+
+    ax.bar(x_axis, y_axis)
+
+    ax.set_title(f'Guess Scores for Answer: {word}, Guess Number: {turn+1}')
+    ax.set_xlabel(f'Top 10 potential Guesses')
+    ax.set_ylabel(f'{score_idx[score]}')
+    ax.tick_params(axis='x', rotation=45)
+
+    plot_canvas = FigureCanvasTkAgg(fig, master=canvas)
+    plot_canvas.draw()
+
+    canvas.create_window(0, 0, anchor="nw",
+                                window=plot_canvas.get_tk_widget())
 
 def display_guess_record(canvas, word_choice):
     pass
 
 def display_distribution():
     distribution = GUESS_RECORD['Distribution']
-    print(distribution)
     canvas.delete('all')
 
     # Create a Matplotlib figure
@@ -51,6 +81,13 @@ def display_distribution():
 
     canvas.create_window(0, 0, anchor="nw",
                                 window=plot_canvas.get_tk_widget())
+
+def validate_choices(word_choice, turn_choice, score_choice):
+    word = word_choice.get()
+    turn = int(turn_choice.get())-1
+    score = score_idx.index(score_choice.get())
+    return word, turn, score
+
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -71,7 +108,7 @@ if __name__ == '__main__':
     word_choice.pack(pady=10)
 
     # Dropdown to pick guess turn 
-    turn_options = ["All", "1", "2", "3", "4", "5", "6", "6+"]
+    turn_options = ["1", "2", "3", "4", "5", "6"]
     turn_choice = ttk.Combobox(root, values=turn_options)
     turn_choice.current(0)
     turn_choice.pack(pady=10)
@@ -84,7 +121,7 @@ if __name__ == '__main__':
 
     # Buttons
     # Display score values for each answer given the turn and value (bar chart word on bottom; value on side)
-    button1 = tk.Button(root, text="Display Guess Score Plot", command=lambda: on_button_click(canvas, 'Scores'))
+    button1 = tk.Button(root, text="Display Guess Score Plot", command=lambda: display_score_plot(canvas, word_choice, turn_choice, score_choice))
     button1.pack(pady=10)
 
     # displays guess record with thr guess, result and entropy + score for each guess
