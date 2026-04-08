@@ -46,7 +46,6 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--solver', action='store_true', help="Run Wordle Solver")
     parser.add_argument('-ts', '--train_solver', action='store_true', help="Trains the solver to find best weights used in word scoring")
     parser.add_argument('-gd', '--gather_data', action='store_true', help="Creates guess matrix, calculates first guess entropies and word probabilites (must be ran before using solver (testing and training))")
-    parser.add_argument('-r', '--results', action='store_true', help="View Results for the previous solver run")
 
     # Set Variables
     parser.add_argument('-sa', '--set_answer', type=str, help="Set Wordle Answer (Only used when playing the game)", default=None)
@@ -54,8 +53,6 @@ if __name__ == "__main__":
     parser.add_argument('-fg', '--set_first_guess', type=str, help='Sets first guess used in solver', default=None)
     parser.add_argument('-ti', '--set_train_iterations', type=int, help='Sets the number of iterations used in training', default=10)
     parser.add_argument('-rs', '--random_samples', type=int , help='Sets the number random samples of words when using the solver (if not set use the entire wordlist)', default=0)
-
-    parser.add_argument('--results_by_answer', type=str, help="Displays results for the given answer")
 
     # Get Args
     args = parser.parse_args()
@@ -74,8 +71,3 @@ if __name__ == "__main__":
     if args.solver or args.train_solver:
         test = False if args.train_solver is None else True
         run_solver(word_list, first_guess, test, args.set_train_iterations, args.random_samples)
-
-    if args.results:
-        r_utils.print_guess_scores(word_list)
-        # r_utils.print_guess_record()
-        # r_utils.print_result_index(word_list, args.results_by_answer)
