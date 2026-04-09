@@ -1,16 +1,17 @@
-from collections import Counter
-import numpy as np
-
 """ 
 Wordle Filter
 
-This module contains functions used to filter out words from word list based on the guess
+This module contains functions used to filter out words 
+from word list based on the guess
 
 Green letter G = Letter is in the answer and also the correct position
 Yellow Y = Letter is in the word but wrong position
 Grey _ = Letter is not in the word
 
 """
+
+from collections import Counter
+import numpy as np
 
 ANSWER = "" # Target word
 WORD_LIST = set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)) # All words available in wordle
@@ -20,7 +21,8 @@ WORD_LEN = 5
 class WordleFilter:
     '''
     Wordle Filter Class
-    Contains relevant functions to filter the word lists given the grey, yellow and green letters and letter occurences
+    Contains relevant functions to filter the word lists given the 
+    grey, yellow and green letters and letter occurences
 
     Attributes:
         words: Set of words that are possible guesses
@@ -166,9 +168,6 @@ class WordleFilter:
             if res in ('G', 'Y'):
                 min_counts[guessed_word[i]] = min_counts.get(guessed_word[i], 0) + 1
 
-        # Get number of guessed letters correct
-        sum_min_counts = sum(min_counts.values())
-
         # Get max occurences a letter can have
         for letter in guessed_word_counts:
             min_letter_count = min_counts.get(letter, 0)
@@ -217,22 +216,4 @@ class WordleFilter:
         self.grey = self.grey - green_set - yellow_set
 
         return self.grey, self.yellow, self.green
-
-
-if __name__ == "__main__":
-    word_filter = WordleFilter()
-
-    # temp
-    word_filter.grey = {'i', 'r', 't', 's', 'o', 'u', 'd', 'g'}
-    word_filter.yellow = [('a', 2), ('n', 4), ('e', 2)]
-    word_filter.green = [('a', 0)]
-
-    word_filter.min_counts = {'a': 1, 'n': 1, 'e': 1}
-    word_filter.max_counts = {'i': 0, 'r': 0, 't': 0, 's': 0, 'o': 0, 'u': 0, 'd': 0, 'g': 0,
-                                'a': 2, 'n': 2, 'e': 2}
-
-    word_filter.words = {'apple', 'brick', 'pulse', 'ankle', 'annex'}
-
-    word_filter.pos_answers, allowed_guesses = word_filter.filter()
-    print(allowed_guesses)
 

@@ -1,6 +1,3 @@
-import random
-import string
-
 """ 
 Wordle Game
 
@@ -14,6 +11,9 @@ Yellow Y = Letter is in the word but wrong position
 Grey _ = Letter is not in the word
 
 """
+
+import random
+import string
 
 WORD_LEN = 5
 MAX_GUESSES = 6

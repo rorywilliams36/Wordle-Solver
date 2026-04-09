@@ -1,6 +1,9 @@
+''' 
+Module to display results from previous solver run in a tkinter gui 
+'''
+
 import tkinter as tk
-from tkinter import ttk, Canvas, Checkbutton, messagebox
-from PIL import Image, ImageTk
+from tkinter import ttk, Canvas
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -144,7 +147,7 @@ def display_distribution():
     ax.set_title('Guess Occurences')
     ax.set_xlabel('Guess Num')
     ax.set_ylabel('Occurences')
-    ax.set_yticks([i for i in range(max(distribution)+1)])
+    ax.set_yticks(list(range(max(distribution)+1)))
     ax.set_xticks([0,1,2,3,4,5,6,7,8,9])
 
     plot_canvas = FigureCanvasTkAgg(fig, master=canvas)

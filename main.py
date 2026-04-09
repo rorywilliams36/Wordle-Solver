@@ -1,13 +1,12 @@
+""" 
+Main module to run the Wordle game or solver using the relevant arguments
+ """
+
 import argparse
 import numpy as np
 
 from wordle_game import run_game
 from solver.solve import run_gather_data, run_solver
-import solver.res_utils as r_utils
-
-"""
-Main module to run the Wordle game or solver using the relevant arguments
-"""
 
 GUESS_LIST = sorted(set(np.loadtxt("data/wordlists/guess_wordlist.txt", dtype=str)))
 ANSWER_LIST = sorted(set(np.loadtxt("data/wordlists/answer_wordlist.txt", dtype=str)))
@@ -58,9 +57,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Validate args
-    word_list = get_wordlist(args.set_wordlist)
-    answer = validate_answer(word_list, args.set_answer)
-    first_guess = validate_word_inputs(word_list, args.set_first_guess)
+    word_list = get_wordlist(args.set_wordlist.lower())
+    answer = validate_answer(word_list, args.set_answer.lower())
+    first_guess = validate_word_inputs(word_list, args.set_first_guess.lower())
 
     if args.game:
         run_game(word_list, answer)

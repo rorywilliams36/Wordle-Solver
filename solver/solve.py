@@ -1,3 +1,11 @@
+"""
+Wordle Solver
+
+This module contains code used to solve and give recommnedation guesses for Wordle
+Uses entropy and other metrics to calculate a score for the best guesses
+"""
+
+
 import os
 import random
 import sys
@@ -5,13 +13,6 @@ import numpy as np
 
 from solver.filters import WordleFilter
 import solver.data_utils as d_utils
-
-"""
-solve
-
-This module contains code used to solve and give recommnedation guesses for Wordle
-
-"""
 
 
 MAX_GUESSES = 6
@@ -96,11 +97,19 @@ class WordleSolver:
             # avoids same guess being submitted if contains the same letters
             # as answer but in different order
             completed_guesses = set()
+
             guess_record[answer] = []
             total_guess_stats[answer] = []
-            total_guess_stats[answer].append([(self.word_to_index[first_guess], first_entropy, first_entropy_ratio, 0, first_word_prob, first_score)])
-
-            while (not solved):
+            total_guess_stats[answer].append([(
+                self.word_to_index[first_guess], 
+                first_entropy, 
+                first_entropy_ratio, 
+                0, 
+                first_word_prob, 
+                first_score
+             )])
+             
+            while not solved:
                 guess_num += 1
 
                 max_entropy = -np.log2(1/pos_answers_remain)      
@@ -209,7 +218,13 @@ class WordleSolver:
 
             # print(guess, H, score, max_entropy, word_prob)
             pos_guess_scores[guess] = score
-            pos_guess_stats.append((self.word_to_index[guess], H, H/max_entropy, worst_case_ratio, word_prob, score))
+            pos_guess_stats.append((
+                self.word_to_index[guess], 
+                H, 
+                H/max_entropy, 
+                worst_case_ratio, 
+                word_prob, score
+            ))
 
         sorted_guess_stats = sorted(pos_guess_stats, key=lambda x: x[-1], reverse=True)[:10]
     
@@ -372,7 +387,7 @@ def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10, 
 
     # Testing
     else:
-        weights = (0.7254558452927472, 0.1029681643013621, 0.12866232366981367) # 3.3.56994369857081 0 3
+        weights = (0.7254558452927472, 0.1029681643013621, 0.12866232366981367)
         solver = WordleSolver(guess_matrix, word_to_index, first_guess_entropy, word_probs, word_list, weights)
         avg_guess, guess_distribution, guess_record, guess_stats = solver.simulate_games(random_samples, first_guess)
         guess_record['Average_Guesses'] = avg_guess

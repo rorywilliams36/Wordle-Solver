@@ -1,11 +1,3 @@
-import os
-import sys
-import json
-import numpy as np
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from wordle_game import WordleGame
-
 """
 Data Utils
 
@@ -13,6 +5,14 @@ This module contains functions in the writing and loading files in the /data fol
 any functions to be used before running the solver for the first time
 
 """
+
+import os
+import sys
+import json
+import numpy as np
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from wordle_game import WordleGame
 
 PATH = f'{os.path.abspath(os.getcwd())}/data'
 
@@ -148,11 +148,11 @@ def load_guess_matrix(word_list):
     return guess_matrix, word_to_index
 
 def load_word_to_index(word_list):
+    ''' Creates indexing tool to be used with the guess matrix'''
     return {w:i for i,w in enumerate(word_list)}
 
 def save_json(f_name, data):
     ''' Loads the JSON file given by filename (f_name) '''
-    json_file = {}
     try:
         with open(f"{PATH}/{f_name}.json", "w") as f:
             json_file = json.dump(data, f)

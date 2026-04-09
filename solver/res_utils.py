@@ -1,3 +1,7 @@
+'''
+Module for loading, reformatting and displaying result files
+'''
+
 import os
 import sys
 import json
