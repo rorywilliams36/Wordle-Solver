@@ -45,6 +45,28 @@ class WordleSolver:
         self.word_list = word_list
         self.weights = weights
 
+
+    def set_first_guess(self, first_guess):
+        ''' 
+        Set first guess if none is defined 
+
+        Args:
+            first_guess: string word set as inital guess
+
+        Returns:
+            first_guess
+            first_entropy: float entropy value for the word set as first guess
+        '''
+
+        if first_guess is None:
+            first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
+            first_entropy = self.first_guess_entropy[first_guess]
+        elif self.first_guess_entropy.get(first_guess):
+            first_entropy = self.first_guess_entropy[first_guess]
+        else:
+            first_entropy = 0
+        return first_guess, first_entropy
+
     def simulate_games(self, random_samples, first_guess: str = None):
         '''
         Plays every possible Wordle game using a set word as the first guess
@@ -57,14 +79,8 @@ class WordleSolver:
         '''
 
         N = len(self.word_list)
-        first_guess = None
 
-
-        # Set first guess if none is defined
-        first_entropy = 0
-        if (first_guess is None) or (not self.first_guess_entropy.get(first_guess)):
-            first_guess = max(self.first_guess_entropy, key = self.first_guess_entropy.get)
-            first_entropy = self.first_guess_entropy[first_guess]
+        first_guess, first_entropy = self.set_first_guess(first_guess)
 
         num_guesses = []
         guess_record = {}
@@ -118,7 +134,7 @@ class WordleSolver:
                 res = self.get_result(guess, answer)
 
                 # add guess to record
-                # print(f'{guess_num, guess, res, entropy, pos_answers_remain}') # pos_answers_remain = num possible answers before guess is made
+                # print(f'{guess_num, guess, res, guess_entropy, pos_answers_remain}') # pos_answers_remain = num possible answers before guess is made
                 guess_record[answer].append(({'Num': guess_num, 'Guess': guess, 'Result': res}))
 
                 # Set guess as submitted 
@@ -147,11 +163,11 @@ class WordleSolver:
                 if len(pos_answers) > 0:
                     pos_guess_scores, guess_stats = self.get_possible_guess_scores(pos_answers, allowed_guesses, max_entropy)
                     guess = max(pos_guess_scores, key = pos_guess_scores.get)
-                    entropy = pos_guess_scores[guess]
+
+                    guess_entropy = pos_guess_scores[guess]
                     pos_answers_remain = len(pos_answers)
                     total_guess_stats[answer].append(guess_stats)
 
-                    
                 # if no guesses available set to unsolved
                 else:
                     guess_num = len(guess_distribution)-1
@@ -180,6 +196,7 @@ class WordleSolver:
         print(f'Mean Guesses to solve: {avg_guess}')
         print(f'Words found in 6< guesses: {unsolved}')
         print(f'Words unsolved/not found: {guess_distribution[-1]}')
+
         return avg_guess, guess_distribution, guess_record, total_guess_stats
 
     def get_possible_guess_scores(self, pos_answers, allowed_guesses, max_entropy):
@@ -251,7 +268,7 @@ class WordleSolver:
             word_prob: float of the probability the word is likely answer
         '''
 
-        worst_word_prob = self.word_probs['pupal'] * 0.1
+        worst_word_prob = min(self.word_probs.values()) * 0.1
 
         # Get word probability
         # if guess is not a possible answer
