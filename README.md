@@ -14,7 +14,7 @@ Currently there maybe a few cases where the word is guessed >6 guesses
 
 ---
 
-## Usuage
+## Usage
 
 Install the requirements using `pip install -r requirements.txt` in your terminal
 
