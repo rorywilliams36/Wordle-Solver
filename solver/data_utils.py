@@ -88,6 +88,7 @@ def find_first_guess(word_list, word_to_index, guess_matrix):
     try:
         with open(entropy_file_path, 'w') as f:
             json.dump(guess_entropy, f)
+            f.close()
     except Exception as e:
         print(f'Error saving entropy file: \n{e}')
 
@@ -98,10 +99,6 @@ def apply_sigmoid():
 
     most_likely = load_wordlist()
 
-
-    # Apply sigmoid function (z)
-
-    # Attach sigmoid value to words
     word_prob = {}
 
     N = len(most_likely) # number of values
@@ -110,15 +107,18 @@ def apply_sigmoid():
     for rank, word in enumerate(most_likely):
         word = most_likely[rank].strip()
 
+        # apply sigmoid function
         x = (rank) / (N - 1)
         z = 1/(1 + np.exp(alpha*(x - beta)))
         word_prob[word] = z
 
     # Save values
     word_prob_path = f"{PATH}/word_probabilites.json"
+
     try:
         with open(word_prob_path, 'w') as f:
             json.dump(word_prob, f)
+            f.close()
     except Exception as e:
         print(f'Error saving word probabilities: \n{e}')
 
