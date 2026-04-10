@@ -96,7 +96,7 @@ def display_guess_record(canvas, word_choice):
 
         # Score + Entropy columns
         score_x = 5 * (TILE_SIZE + PADDING) + 20
-        if row < 6:
+        if row < len(guesses):
             canvas.create_text(
                 score_x,
                 (y1 + y2)//2,
@@ -106,7 +106,7 @@ def display_guess_record(canvas, word_choice):
             )
 
         entropy_x = score_x + 70
-        if row < 6:
+        if row < len(guesses):
             canvas.create_text(
                 entropy_x,
                 (y1 + y2)//2,
