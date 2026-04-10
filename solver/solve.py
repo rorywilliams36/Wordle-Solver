@@ -99,13 +99,17 @@ class WordleSolver:
             words = list(self.word_list)
 
         for i, answer in enumerate(words):
+            # reset values
             filters = WordleFilter(self.word_list)
 
             guess = first_guess
             entropy = first_entropy
+
+            # pos_answers_remain = num possible answers before guess is made
             pos_answers_remain = N
             guess_num = 0
             solved = False
+
             # print('================')
             # print(f'{i} Answer: {answer}')
 
@@ -116,6 +120,7 @@ class WordleSolver:
 
             guess_record[answer] = []
             total_guess_stats[answer] = []
+            
             total_guess_stats[answer].append([(
                 self.word_to_index[first_guess], 
                 first_entropy, 
@@ -133,8 +138,8 @@ class WordleSolver:
                 # gets result for chosen guess
                 res = self.get_result(guess, answer)
 
-                # add guess to record
-                # print(f'{guess_num, guess, res, guess_entropy, pos_answers_remain}') # pos_answers_remain = num possible answers before guess is made
+                # add guess to record 
+                # print(f'{guess_num, guess, res, guess_entropy, pos_answers_remain}')
                 guess_record[answer].append(({'Num': guess_num, 'Guess': guess, 'Result': res}))
 
                 # Set guess as submitted 
@@ -377,7 +382,7 @@ def run_solver(word_list, first_guess, test: bool = True, train_iter: int = 10, 
         best_score = 4
         best_weights = (0,0,0)
         best_distribution = []
-
+ 
         for i in range(train_iter):
             w1 = random.uniform(0.65, 0.75) # Entropy weight (more value when selecting word) 
             w2 = random.uniform(0.1, 0.25) # Worst case weight (slight bias to word removal)
