@@ -206,12 +206,12 @@ if __name__ == '__main__':
     score_choice.pack(pady=10)
 
     # Buttons
-    # Display score values for each answer given the turn and value
-    button1 = tk.Button(root, text="Display Guess Score Plot", command=lambda: display_score_plot(canvas, word_choice, turn_choice, score_choice))
+    # displays guess record with thr guess, result and entropy + score for each guess
+    button1 = tk.Button(root, text="Display Guess Record", command=lambda: display_guess_record(canvas, word_choice))
     button1.pack(pady=10)
 
-    # displays guess record with thr guess, result and entropy + score for each guess
-    button2 = tk.Button(root, text="Display Guess Record", command=lambda: display_guess_record(canvas, word_choice))
+    # Display score values for each answer given the turn and value
+    button2 = tk.Button(root, text="Display Guess Score Plot", command=lambda: display_score_plot(canvas, word_choice, turn_choice, score_choice))
     button2.pack(pady=10)
 
     # bar chart
