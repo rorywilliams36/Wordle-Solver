@@ -23,6 +23,7 @@ colors = {'_': "#787c7e", 'Y': "#c9b458", 'G': "#6aaa64" }
 
 def display_score_plot(canvas, word_choice, turn_choice, score_choice):
     ''' Displays bar chart showing relevant score metrics with the best possible guesses given the answer and turn number '''
+    # Get values for plot from dropdowns
     word, turn, score = get_choices(word_choice, turn_choice, score_choice)
     game_scores = GUESS_SCORES[word]
 
@@ -31,22 +32,24 @@ def display_score_plot(canvas, word_choice, turn_choice, score_choice):
 
     turn_scores = game_scores[turn]
 
+    # crate axis
     x_axis = [i[0] for i in turn_scores]
     y_axis = [i[score] for i in turn_scores]
 
     canvas.delete('all')
 
-    # Create a Matplotlib figure
+    # Plot values
     fig = Figure(figsize=(5, 5), dpi=100)
     ax = fig.add_subplot(111)
-
     ax.bar(x_axis, y_axis)
 
+    # annotations
     ax.set_title(f'Guess Scores for Answer: {word}, Guess Number: {turn+1}')
     ax.set_xlabel(f'Top 10 Potential Guesses')
     ax.set_ylabel(f'{score_idx[score]}')
     ax.tick_params(axis='x', rotation=45)
 
+    # draw to canvas
     plot_canvas = FigureCanvasTkAgg(fig, master=canvas)
     plot_canvas.draw()
 
@@ -55,6 +58,7 @@ def display_score_plot(canvas, word_choice, turn_choice, score_choice):
 
 def display_guess_record(canvas, word_choice):
     ''' Diplays the solvers guesses with metrics for the wordle game given the answer '''
+    # get word and values
     word = word_choice.get()
     guesses = GUESS_RECORD[word]
     num_guesses = len(guesses)
@@ -68,6 +72,8 @@ def display_guess_record(canvas, word_choice):
     Y_OFFSET = 25
 
     canvas.delete('all')
+
+    # create wordle graphic
     for row in range(len(guesses)):
         for col in range(5):
             # Get the guess and the result
@@ -78,6 +84,7 @@ def display_guess_record(canvas, word_choice):
             letter = guess[col].upper()
             letter_colour = result[col]
 
+            # coords for letter squares
             x1 = col * (TILE_SIZE + PADDING) + PADDING
             y1 = row * (TILE_SIZE + PADDING) + PADDING + Y_OFFSET
             x2 = x1 + TILE_SIZE
@@ -86,6 +93,7 @@ def display_guess_record(canvas, word_choice):
             # Wordle Grid
             canvas.create_rectangle(x1, y1, x2, y2, fill=colors[letter_colour], outline="")
 
+            # Put letter in square
             canvas.create_text(
                 (x1 + x2)//2,
                 (y1 + y2)//2,
@@ -94,7 +102,7 @@ def display_guess_record(canvas, word_choice):
                 font=("Helvetica", 20, "bold")
             )
 
-        # Score + Entropy columns
+        # Score Column
         score_x = 5 * (TILE_SIZE + PADDING) + 20
         if row < len(guesses):
             canvas.create_text(
@@ -105,6 +113,7 @@ def display_guess_record(canvas, word_choice):
                 font=("Helvetica", 14)
             )
 
+        # Entropy column
         entropy_x = score_x + 70
         if row < len(guesses):
             canvas.create_text(
@@ -139,17 +148,19 @@ def display_distribution():
     distribution = GUESS_RECORD['Distribution']
     canvas.delete('all')
 
-    # Create a Matplotlib figure
+    # Plot
     fig = Figure(figsize=(5, 4), dpi=100)
     ax = fig.add_subplot(111)
     ax.bar([0,1,2,3,4,5,6,7,8,9], distribution)
 
+    # Annotations
     ax.set_title('Guess Occurences')
     ax.set_xlabel('Guess Num')
     ax.set_ylabel('Occurences')
     ax.set_yticks(list(range(max(distribution)+1)))
     ax.set_xticks([0,1,2,3,4,5,6,7,8,9])
 
+    # Draw to canvas
     plot_canvas = FigureCanvasTkAgg(fig, master=canvas)
     plot_canvas.draw()
 
