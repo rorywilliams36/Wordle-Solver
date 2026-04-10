@@ -13,7 +13,6 @@ Grey _ = Letter is not in the word
 from collections import Counter
 import numpy as np
 
-ANSWER = "" # Target word
 WORD_LIST = set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)) # All words available in wordle
 WORDS_LIST_LEN = len(WORD_LIST)
 WORD_LEN = 5
@@ -108,13 +107,15 @@ class WordleFilter:
             bool whether the word is valid/possible answer based on the letter counts
             '''
         word_counts = Counter(word)
+
+        # Filter min counts
         for l in self.min_counts:
             if word_counts[l] < self.min_counts[l]:
-                # print(f'Min {word, l, word_counts[l], self.max_counts[l]}')
                 return False
+
+        # filter max counts
         for l in self.max_counts:
             if word_counts[l] > self.max_counts[l]:
-                # print(f'Max {word, l, word_counts[l], self.max_counts[l]}')
                 return False
         return True
 
