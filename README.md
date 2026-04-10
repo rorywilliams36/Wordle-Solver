@@ -18,14 +18,14 @@ Currently there maybe a few cases where the word is guessed >6 guesses
 
 Install the requirements using `pip install -r requirements.txt` in your terminal
 
-Navigate to the folder that contains this project and run `python main.py`
+Navigate to the folder that contains this project and run `python main.py`  
 This file contains arguments to run each part of the code (use `--help` to view)
 
 **First Program Run:**  
 `python main.py -gd -wl {guesses, answers, most_common}`  
   
-This creates all data needed to run the solver 
-The word list used are either:
+This creates all data needed to run the solver  
+The word list used are either:  
 - `guesses`: all allowed guesses in Wordle (~23000 words)
 - `answers`: all previous answer for Wordle (~2300 words)
 - `most_common`: (Default Option) most common five letter words (~5750 words)   
