@@ -14,6 +14,8 @@ WORD_LIST = sorted(set(np.loadtxt("data/wordlists/most_common.txt", dtype=str)))
 
 def get_wordlist(word_list_arg):
     ''' Returns wordlist given its arg '''
+    if word_list_arg is not None:
+        word_list_arg = word_list_arg.lower()
     if word_list_arg == 'guesses':
         return GUESS_LIST
     if word_list_arg == 'answers':
@@ -23,6 +25,7 @@ def get_wordlist(word_list_arg):
 def validate_word_inputs(word_list, input_word):
     ''' Checks if word defined in arg is valid (word set for first guess, etc) '''
     if input_word is not None:
+        input_word = input_word.lower()
         if (input_word in word_list) or ((len(input_word) == 5) and (input_word.isalpha())):
             return input_word
         print(f'{input_word}: is not valid to use. The first guess will be the word with largest entropy')
@@ -31,6 +34,7 @@ def validate_word_inputs(word_list, input_word):
 def validate_answer(word_list, input_word):
     ''' Checks if word set as answer is contained in the defined word list '''
     if input_word is not None:
+        input_word = input_word.lower()
         if input_word in word_list:
             return input_word
         print(f'{input_word}: is not valid to use. The answer will be randomised from the word list')
@@ -57,9 +61,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Validate args
-    word_list = get_wordlist(args.set_wordlist.lower())
-    answer = validate_answer(word_list, args.set_answer.lower())
-    first_guess = validate_word_inputs(word_list, args.set_first_guess.lower())
+    word_list = get_wordlist(args.set_wordlist)
+    answer = validate_answer(word_list, args.set_answer)
+    first_guess = validate_word_inputs(word_list, args.set_first_guess)
 
     if args.game:
         run_game(word_list, answer)
